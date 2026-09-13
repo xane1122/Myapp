@@ -1,0 +1,53 @@
+name: MyApp Beta unsigned IPA
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, beta, 'beta/**']
+    paths:
+      - 'MyAppBeta/**'
+      - 'MyAppBetaTests/**'
+      - 'MyAppBeta.xcodeproj/**'
+      - 'tools/**'
+      - '.github/workflows/beta-ios.yml'
+permissions:
+  contents: read
+concurrency:
+  group: beta-ios-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  build:
+    runs-on: macos-15
+    timeout-minutes: 35
+    env:
+      BETA_BUILD_NUMBER: ${{ github.run_number }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate source and bridge
+        run: |
+          python3 tools/check_project.py
+          node --test tests/bridge.test.cjs
+      - name: Simulator unit tests
+        run: bash tools/test_ios.sh
+      - name: Build unsigned device IPA
+        run: bash tools/build_ipa.sh
+      - name: Upload SideStore package
+        uses: actions/upload-artifact@v4
+        with:
+          name: MyApp-Beta-unsigned-${{ github.run_number }}
+          path: |
+            build/MyApp-Beta-unsigned.ipa
+            build/MyApp-Beta-unsigned.json
+            build/SHA256SUMS.txt
+          if-no-files-found: error
+          retention-days: 14
+      - name: Upload validation logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: MyApp-Beta-checks-${{ github.run_number }}
+          path: |
+            build/*.log
+            build/*xcresult
+            build/xcode-version.txt
+          if-no-files-found: ignore
+          retention-days: 7
