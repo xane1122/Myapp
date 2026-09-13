@@ -26,7 +26,7 @@ jobs:
         run: |
           python3 tools/check_project.py
           node --test tests/bridge.test.cjs
-      - name: Simulator unit tests
+      - name: Compile iOS unit tests
         run: bash tools/test_ios.sh
       - name: Build unsigned device IPA
         run: bash tools/build_ipa.sh
