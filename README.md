@@ -27,6 +27,9 @@ bash tools/test_ios.sh
 bash tools/build_ipa.sh
 ```
 
+`test_ios.sh` 默认编译 App 与测试包。安装完整 iOS Simulator 运行时的 Mac 可用
+`RUN_SIMULATOR_TESTS=1 bash tools/test_ios.sh` 实际执行 XCTest。
+
 产物是 `build/MyApp-Beta-unsigned.ipa`。脚本在打包前验证 Bundle ID、显示名称、iPhoneOS 平台、arm64 Mach-O 和未嵌入 profile，避免把模拟器包或正式版误当成 Beta。
 
 ## GitHub Actions
