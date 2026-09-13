@@ -29,6 +29,7 @@
   const api = {
     version: 1,
     request,
+    openSettings: () => request('settings.open'),
     pickMedia: options => request('media.pick', options),
     requestNotifications: () => request('notifications.request'),
     scheduleNotification: options => request('notifications.schedule', options),
@@ -92,6 +93,18 @@
   }, true);
 
   function installPageAdapters() {
+    // Keep native controls in the existing settings menu, without permanent app chrome.
+    const menu = document.querySelector('#settingsMenu .settings-menu-group');
+    if (menu && !document.querySelector('#myapp-beta-settings')) {
+      const button = document.createElement('button');
+      button.id = 'myapp-beta-settings';
+      button.type = 'button';
+      button.textContent = 'MyApp Beta · 通知与应用设置';
+      button.addEventListener('click', () => api.openSettings().catch(error => {
+        if (typeof window.toast === 'function') window.toast(error.message);
+      }));
+      menu.appendChild(button);
+    }
     // Existing production parser consumes NDJSON and returns the committed message ID.
     // Observe its return value; do not clone streams, retry POSTs, or copy request secrets.
     if (typeof window.readChatStream === 'function') {

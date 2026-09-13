@@ -9,6 +9,7 @@ final class WebAppModel: NSObject, ObservableObject, WKNavigationDelegate, WKUID
     @Published var errorText: String?
     @Published var online = true
     @Published var status = ""
+    @Published var showSettings = false
     let webView: WKWebView
     private var cookies: CookiePersistence!
     private let monitor = NWPathMonitor()
@@ -71,6 +72,7 @@ final class WebAppModel: NSObject, ObservableObject, WKNavigationDelegate, WKUID
     }
 
     func openDeepLink(_ url: URL) {
+        if url.scheme == "myapp-beta", url.host == "settings" { showSettings = true; return }
         guard url.scheme == "myapp-beta", url.host == "chat",
               let parts = URLComponents(url: url, resolvingAgainstBaseURL: false) else { return }
         func value(_ name: String) -> String { parts.queryItems?.first(where: { $0.name == name })?.value ?? "" }
@@ -98,6 +100,12 @@ final class WebAppModel: NSObject, ObservableObject, WKNavigationDelegate, WKUID
         loading = false; failed = false; errorText = nil
         cookies.save()
         // Route is acknowledged by the bridge only after the page has attempted positioning.
+    }
+
+    func webView(_ webView: WKWebView, didCommit navigation: WKNavigation!) {
+        // Do not keep the native spinner over an already visible, usable page while
+        // secondary images or other resources are still downloading.
+        loading = false; failed = false; errorText = nil
     }
 
     private func navigationFailed(_ error: Error) {
@@ -172,6 +180,10 @@ final class WebAppModel: NSObject, ObservableObject, WKNavigationDelegate, WKUID
 
     private func handle(_ method: String, payload: [String: Any]) async throws -> Any {
         switch method {
+        case "settings.open":
+            guard UIApplication.shared.applicationState == .active else { throw BetaError.message("请在 App 前台打开设置。") }
+            showSettings = true
+            return ["opened": true]
         case "ping": return ["version": 1, "name": "MyApp Beta", "backgroundResults": AppConfiguration.backgroundResultsEnabled]
         case "media.pick":
             guard UIApplication.shared.applicationState == .active, let presenter else { throw BetaError.message("请在 App 前台选择文件。") }
