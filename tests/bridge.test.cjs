@@ -60,3 +60,19 @@ test('page adapter reports committed assistant reply IDs', async () => {
   assert.equal(value.posted[0].payload.message_id, '902');
   value.window.MyAppNative._resolve(value.posted[0].id, { received: true }, null);
 });
+
+test('settings menu opens native settings without adding controls to chat', async () => {
+  const value = context();
+  const children = [];
+  const callbacks = {};
+  value.sandbox.document.querySelector = selector => selector === '#settingsMenu .settings-menu-group'
+    ? { appendChild(button) { children.push(button); } } : null;
+  value.sandbox.document.createElement = () => ({ addEventListener(name, fn) { callbacks[name] = fn; } });
+  vm.runInNewContext(source, value.sandbox);
+  value.listeners.DOMContentLoaded();
+  assert.equal(children.length, 1);
+  assert.equal(children[0].id, 'myapp-beta-settings');
+  callbacks.click();
+  assert.equal(value.posted[0].method, 'settings.open');
+  value.window.MyAppNative._resolve(value.posted[0].id, { opened: true }, null);
+});
