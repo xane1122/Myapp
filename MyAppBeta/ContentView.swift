@@ -7,9 +7,10 @@ struct ContentView: View {
     var body: some View {
         ZStack(alignment: .top) {
             // The website already uses viewport-fit=cover and CSS safe-area insets.
-            // Extend its background to the screen edges while retaining keyboard avoidance.
+            // Keep the WebView full screen while the keyboard is visible.
+            // The site uses visualViewport to move chat controls above the keyboard.
             PersistentWebView(webView: model.webView)
-                .ignoresSafeArea(.container)
+                .ignoresSafeArea(.all)
             if !model.online {
                 Text("当前离线 · 联网后自动恢复加载").font(.caption).frame(maxWidth: .infinity).padding(6).background(Color.orange.opacity(0.14))
             }
