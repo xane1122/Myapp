@@ -34,6 +34,8 @@ bash tools/build_ipa.sh
 
 ## GitHub Actions
 
-Actions 在 `macos-15` 上运行源码检查、Bridge 测试、iOS Simulator 单元测试及无签名 device build，最后上传未签名 IPA、元数据和 SHA-256。下载 Actions artifact，解压后把 `.ipa` 导入 SideStore。
+Actions 在 `macos-15` 上运行源码检查、Bridge 测试、iOS Simulator 测试包编译及无签名 device build，最后上传未签名 IPA、元数据和 SHA-256。下载 Actions artifact，解压后把 `.ipa` 导入 SideStore。
+
+Beta 不再增加常驻标题栏，网页背景延伸至屏幕边缘，由网站现有 CSS 处理安全区。原生通知与应用设置可从网站的「设置 → MyApp Beta · 通知与应用设置」打开，或使用 `myapp-beta://settings`。本地壁纸目前只保存在设置它的设备上，并不会通过 GitHub 或 Cookie 同步；跨设备同步方案见 `docs/REPAIR-FINDINGS.md`。
 
 后台回复所需的最小服务器接口见 [docs/BACKGROUND-API.md](docs/BACKGROUND-API.md)。
