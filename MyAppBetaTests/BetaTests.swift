@@ -89,4 +89,15 @@ final class BetaTests: XCTestCase {
         XCTAssertTrue(model.webView.allowsBackForwardNavigationGestures)
         XCTAssertNil(model.webView.url) // Instantiation does not load production during tests.
     }
+
+    @MainActor
+    func testVisiblePageStopsNativeSpinnerAndSettingsDeepLinkRemainsAvailable() {
+        let model = WebAppModel()
+        model.webView(model.webView, didStartProvisionalNavigation: nil)
+        XCTAssertTrue(model.loading)
+        model.webView(model.webView, didCommit: nil)
+        XCTAssertFalse(model.loading)
+        model.openDeepLink(URL(string: "myapp-beta://settings")!)
+        XCTAssertTrue(model.showSettings)
+    }
 }
