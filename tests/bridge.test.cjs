@@ -18,13 +18,15 @@ function context(origin = 'https://xanelove.com') {
   const location = new URL(origin + '/?conversation_id=47&message_id=902&beta_assistant=grok');
   const window = {
     location,
+    crypto: { randomUUID() { return '12345678-1234-4123-8123-1234567890ab'; } },
+    fetch: async () => { throw new Error('unexpected fetch'); },
     webkit: { messageHandlers: { myappBeta: { postMessage(value) { posted.push(value); } } } },
     localStorage: { getItem(key) { return storage.get(key) ?? null; }, setItem(key, value) { storage.set(key, value); } },
     addEventListener() {}, dispatchEvent() {}, toast() {}
   };
   window.window = window; window.top = window;
   const sandbox = { window, location, document, localStorage: window.localStorage,
-    URLSearchParams, URL, Math, Date, Promise, Map, Object, String,
+    URLSearchParams, URL, Response, Math, Date, Promise, Map, Object, String,
     setTimeout, clearTimeout, setInterval() { return 1; }, clearInterval() {}, Event: class {}, CustomEvent: class {},
     HTMLInputElement: class {}, File: class {}, DataTransfer: class {} };
   return { sandbox, window, posted, listeners, storage };
@@ -75,4 +77,31 @@ test('settings menu opens native settings without adding controls to chat', asyn
   callbacks.click();
   assert.equal(value.posted[0].method, 'settings.open');
   value.window.MyAppNative._resolve(value.posted[0].id, { opened: true }, null);
+});
+
+test('chat POST becomes a native background job and reconstructs the saved reply', async () => {
+  const value = context();
+  const calls = [];
+  value.window.fetch = async (url, options) => {
+    calls.push({ url: String(url), options });
+    if (String(url).includes('/result')) return new Response(JSON.stringify({
+      job_id: '12345678-1234-4123-8123-1234567890ab', status: 'completed', conversation_id: 47,
+      message_id: 902, user_message_id: 901, user_message_ids: [901], assistant: 'grok'
+    }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+    return new Response(JSON.stringify({ history: [{ id: 902, conversation_id: 47, role: 'assistant', reply: 'done', content: 'done' }] }),
+      { status: 200, headers: { 'Content-Type': 'application/json' } });
+  };
+  vm.runInNewContext(source, value.sandbox);
+  const pending = value.window.fetch('/api/chat', { method: 'POST', body: JSON.stringify({ conversation_id: 47, message: 'hello' }) });
+  await Promise.resolve();
+  assert.equal(value.posted[0].method, 'reply.start');
+  value.window.MyAppNative._resolve(value.posted[0].id, {
+    job_id: '12345678-1234-4123-8123-1234567890ab', conversation_id: 47, assistant: 'grok',
+    result_url: 'https://xanelove.com/api/native-replies/12345678-1234-4123-8123-1234567890ab/result', result_token: 'a'.repeat(43)
+  }, null);
+  const response = await pending, data = await response.json();
+  assert.equal(data.assistant_message_id, 902);
+  assert.equal(data.reply, 'done');
+  assert.equal(data.__myappNativeJob, true);
+  assert.equal(calls[0].options.headers['X-MyApp-Reply-Token'], 'a'.repeat(43));
 });

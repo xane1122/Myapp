@@ -6,7 +6,10 @@ import WebKit
 final class BetaTests: XCTestCase {
     func testBundleIsolationAndOriginBoundary() {
         XCTAssertNotEqual(AppConfiguration.bundleID, AppConfiguration.legacyBundleID)
-        XCTAssertFalse(AppConfiguration.backgroundResultsEnabled)
+        XCTAssertTrue(AppConfiguration.backgroundResultsEnabled)
+        XCTAssertEqual(AppConfiguration.nativeClientMarker, "MyAppBeta/15")
+        XCTAssertEqual(AppConfiguration.nativeReplyURL.path, "/api/native-replies")
+        XCTAssertEqual(NotificationService.previewPreferenceKey, "beta.notificationShowsPreview")
         XCTAssertTrue(AppConfiguration.isTrusted(URL(string: "https://xanelove.com/?conversation_id=1")))
         for value in ["http://xanelove.com", "https://xanelove.com.evil.test", "https://evil.test/xanelove.com", "https://xanelove.com:444", "https://user@xanelove.com", "file:///tmp/index.html"] {
             XCTAssertFalse(AppConfiguration.isTrusted(URL(string: value)), value)

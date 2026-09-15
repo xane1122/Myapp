@@ -6,9 +6,9 @@ struct ContentView: View {
 
     var body: some View {
         ZStack(alignment: .top) {
-            // The website already uses viewport-fit=cover and CSS safe-area insets.
-            // Keep the WebView full screen while the keyboard is visible.
-            // The site uses visualViewport to move chat controls above the keyboard.
+            // Keep the WebView at full-screen size while the keyboard is visible so
+            // wallpaper viewport units do not recalculate against a shorter native view.
+            // The site uses visualViewport to keep chat controls above the keyboard.
             PersistentWebView(webView: model.webView)
                 .ignoresSafeArea(.all)
             if !model.online {
@@ -39,6 +39,7 @@ private struct BetaSettingsView: View {
     @ObservedObject var model: WebAppModel
     @Environment(\.dismiss) private var dismiss
     @State private var result = ""
+    @AppStorage(NotificationService.previewPreferenceKey) private var showsNotificationPreview = true
 
     var body: some View {
         NavigationStack {
@@ -48,6 +49,7 @@ private struct BetaSettingsView: View {
                     Button("重新加载网页") { model.reload(); dismiss() }
                 }
                 Section("本地通知") {
+                    Toggle("通知显示消息详情", isOn: $showsNotificationPreview)
                     Button("开启通知、声音和角标") {
                         Task {
                             do { result = try await NotificationService.shared.requestPermission() ? "通知已允许。" : "通知未允许，可前往 iPhone 设置开启。" }
@@ -62,7 +64,7 @@ private struct BetaSettingsView: View {
                             } catch { result = error.localizedDescription }
                         }
                     }
-                    Text("已有回复可携带会话和消息定位。本地通知不是远程推送；后台结果下载尚未接入服务器。")
+                    Text("通知标题显示 Rhys；可隐藏回复详情。点击通知可进入对应会话并定位消息。")
                         .font(.footnote).foregroundStyle(.secondary)
                 }
                 if !result.isEmpty { Section { Text(result).accessibilityIdentifier("beta.status") } }
