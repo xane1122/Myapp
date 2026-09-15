@@ -1,8 +1,8 @@
 import Foundation
+import UIKit
 
-// Inactive in phase one. No production endpoint is contacted while the feature flag is false.
-// See docs/BACKGROUND-API.md before enabling. The background session owns downloads,
-// never model requests, chat POSTs, polling loops, or credential changes.
+// The foreground bridge creates a short-lived server job, then this background session
+// owns only its token-protected result download. It never sends model or chat requests.
 final class BackgroundReplySession: NSObject, URLSessionDownloadDelegate {
     static let shared = BackgroundReplySession()
     static var identifier: String { (Bundle.main.bundleIdentifier ?? AppConfiguration.bundleID) + ".reply-downloads.v1" }
@@ -30,6 +30,7 @@ final class BackgroundReplySession: NSObject, URLSessionDownloadDelegate {
         let conversation_id: String
         let message_id: String
         let assistant: String?
+        let preview: String?
     }
 
     func reconnect() { if AppConfiguration.backgroundResultsEnabled { _ = session } }
@@ -43,6 +44,7 @@ final class BackgroundReplySession: NSObject, URLSessionDownloadDelegate {
         guard let job = payload["job_id"] as? String, UUID(uuidString: job) != nil,
               let conversation = payload["conversation_id"],
               let rawURL = payload["result_url"] as? String, let url = URL(string: rawURL),
+              let token = payload["result_token"] as? String, token.count == 43,
               AppConfiguration.isTrusted(url), url.path == "/api/native-replies/\(job)/result",
               ChatRoute(conversationID: String(describing: conversation), messageID: "1") != nil else {
             throw BetaError.message("无效的后台下载凭据。")
@@ -51,7 +53,9 @@ final class BackgroundReplySession: NSObject, URLSessionDownloadDelegate {
         let description = String(data: try JSONEncoder().encode(ticket), encoding: .utf8)!
         session.getAllTasks { [weak self] tasks in
             guard let self, !tasks.contains(where: { $0.taskDescription == description }), tasks.count < 8 else { return }
-            let task = self.session.downloadTask(with: url)
+            var request = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalAndRemoteCacheData, timeoutInterval: 21_600)
+            request.setValue(token, forHTTPHeaderField: "X-MyApp-Reply-Token")
+            let task = self.session.downloadTask(with: request)
             task.taskDescription = description
             task.resume()
         }
@@ -81,8 +85,9 @@ final class BackgroundReplySession: NSObject, URLSessionDownloadDelegate {
             // Keep only non-sensitive routing IDs, never downloaded message bodies/tokens.
             let key = "beta.completedReply.\(ticket.jobID)"
             guard !UserDefaults.standard.bool(forKey: key) else { return }
+            let shouldNotify = await MainActor.run { UIApplication.shared.applicationState != .active }
             do {
-                try await NotificationService.shared.schedule(route: route)
+                if shouldNotify { try await NotificationService.shared.schedule(route: route, body: result.preview ?? "有一条新回复，点击查看。") }
                 UserDefaults.standard.set(true, forKey: key)
             } catch { /* User can open the ordinary web history when notification permission is denied. */ }
         }

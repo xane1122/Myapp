@@ -4,8 +4,9 @@ enum AppConfiguration {
     static let homeURL = URL(string: "https://xanelove.com")!
     static let bundleID = "com.xanelove.myapp.beta"
     static let legacyBundleID = "com.example.MyWebApp"
-    // Enable only after the proposed server contract has been approved and deployed.
-    static let backgroundResultsEnabled = false
+    static let backgroundResultsEnabled = true
+    static let nativeReplyURL = URL(string: "https://xanelove.com/api/native-replies")!
+    static let nativeClientMarker = "MyAppBeta/15"
 
     static func isTrusted(_ url: URL?) -> Bool {
         guard let url else { return false }

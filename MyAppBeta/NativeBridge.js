@@ -43,9 +43,49 @@
   };
   Object.defineProperty(window, 'MyAppNative', { value: Object.freeze(api), configurable: false, writable: false });
 
+  const originalFetch = typeof window.fetch === 'function' ? window.fetch.bind(window) : null;
+  function isNativeChatRequest(input, options) {
+    try {
+      const url = new URL(typeof input === 'string' || input instanceof URL ? input : input.url, location.href);
+      const method = String(options?.method || input?.method || 'GET').toUpperCase();
+      return url.origin === location.origin && url.pathname === '/api/chat' && method === 'POST';
+    } catch (_) { return false; }
+  }
+  async function inputBody(input, options) {
+    if (typeof options?.body === 'string') return options.body;
+    if (input && typeof input.clone === 'function') return input.clone().text();
+    throw new Error('原生后台回复只接受 JSON 请求。');
+  }
+  if (originalFetch && typeof Response === 'function') {
+    window.fetch = async function (input, options = {}) {
+      if (!isNativeChatRequest(input, options)) return originalFetch(input, options);
+      const body = await inputBody(input, options);
+      const idempotencyKey = window.crypto?.randomUUID?.();
+      if (!idempotencyKey) throw new Error('当前系统无法创建后台回复任务。');
+      const ticket = await request('reply.start', { body, idempotency_key: idempotencyKey });
+      const resultResponse = await originalFetch(ticket.result_url, {
+        method: 'GET', cache: 'no-store', headers: { 'X-MyApp-Reply-Token': ticket.result_token }, signal: options.signal
+      });
+      const result = await resultResponse.json().catch(() => ({}));
+      if (!resultResponse.ok || result.status !== 'completed') throw new Error('后台回复未完成，请稍后刷新聊天记录。');
+      const historyResponse = await originalFetch(`/api/history?conversation_id=${encodeURIComponent(result.conversation_id)}&limit=50`, { cache: 'no-store' });
+      const historyData = await historyResponse.json().catch(() => ({}));
+      const assistant = (historyData.history || []).find(item => String(item.id) === String(result.message_id) && item.role === 'assistant');
+      if (!historyResponse.ok || !assistant) throw new Error('回复已保存，请刷新聊天记录查看。');
+      const responseData = Object.assign({}, assistant, {
+        conversation_id: result.conversation_id,
+        assistant_message_id: result.message_id,
+        user_message_id: result.user_message_id || 0,
+        user_message_ids: result.user_message_ids || [],
+        __myappNativeJob: true
+      });
+      return new Response(JSON.stringify(responseData), { status: 200, headers: { 'Content-Type': 'application/json' } });
+    };
+  }
+
   const messageID = value => /^[1-9]\d*$/.test(String(value)) && Number.isSafeInteger(Number(value));
   function reportCompletion(data, assistant) {
-    if (!data || !messageID(data.conversation_id) || !messageID(data.assistant_message_id)) return;
+    if (!data || data.__myappNativeJob || !messageID(data.conversation_id) || !messageID(data.assistant_message_id)) return;
     request('reply.completed', {
       conversation_id: String(data.conversation_id), message_id: String(data.assistant_message_id), assistant
     }).catch(() => {});

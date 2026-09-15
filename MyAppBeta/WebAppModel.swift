@@ -202,6 +202,8 @@ final class WebAppModel: NSObject, ObservableObject, WKNavigationDelegate, WKUID
                 try await NotificationService.shared.schedule(route: route)
             }
             return ["received": true]
+        case "reply.start":
+            return try await startNativeReply(payload)
         case "route.handled":
             if let route = routeInFlight,
                String(describing: payload["message_id"] ?? "") == route.messageID,
@@ -215,6 +217,31 @@ final class WebAppModel: NSObject, ObservableObject, WKNavigationDelegate, WKUID
             return ["queued": true]
         default: throw BetaError.message("不支持的 Bridge 方法。")
         }
+    }
+
+    private func startNativeReply(_ payload: [String: Any]) async throws -> [String: Any] {
+        guard AppConfiguration.backgroundResultsEnabled,
+              let body = payload["body"] as? String, let bytes = body.data(using: .utf8), !bytes.isEmpty, bytes.count <= 2_097_152,
+              let idempotencyKey = payload["idempotency_key"] as? String, UUID(uuidString: idempotencyKey) != nil else {
+            throw BetaError.message("后台回复请求无效。")
+        }
+        var request = URLRequest(url: AppConfiguration.nativeReplyURL, cachePolicy: .reloadIgnoringLocalAndRemoteCacheData, timeoutInterval: 45)
+        request.httpMethod = "POST"
+        request.httpBody = bytes
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("https://xanelove.com", forHTTPHeaderField: "Origin")
+        request.setValue(AppConfiguration.nativeClientMarker, forHTTPHeaderField: "X-MyApp-Client")
+        request.setValue(idempotencyKey, forHTTPHeaderField: "Idempotency-Key")
+        let backgroundTask = UIApplication.shared.beginBackgroundTask(withName: "Start MyApp reply")
+        defer { if backgroundTask != .invalid { UIApplication.shared.endBackgroundTask(backgroundTask) } }
+        let (data, response) = try await URLSession.shared.data(for: request)
+        guard data.count <= 1_048_576, let http = response as? HTTPURLResponse,
+              http.statusCode == 202, AppConfiguration.isTrusted(http.url), http.url?.path == AppConfiguration.nativeReplyURL.path,
+              let ticket = try JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+            throw BetaError.message("后台回复任务创建失败。")
+        }
+        try BackgroundReplySession.shared.enqueue(ticket)
+        return ticket
     }
 
     private func respond(_ id: String, value: Any = NSNull(), error: String? = nil) {

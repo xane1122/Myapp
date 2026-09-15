@@ -4,6 +4,7 @@ import UIKit
 
 final class NotificationService: NSObject, UNUserNotificationCenterDelegate {
     static let shared = NotificationService()
+    static let previewPreferenceKey = "beta.notificationShowsPreview"
     private let center = UNUserNotificationCenter.current()
     private let pendingKey = "beta.pendingChatRoute"
 
@@ -11,7 +12,7 @@ final class NotificationService: NSObject, UNUserNotificationCenterDelegate {
         try await center.requestAuthorization(options: [.alert, .sound, .badge])
     }
 
-    func schedule(route: ChatRoute?, title: String = "MyApp Beta", body: String = "有一条新回复，点击查看。",
+    func schedule(route: ChatRoute?, title: String = "Rhys", body: String = "有一条新回复，点击查看。",
                   delay: TimeInterval = 1, identifier: String? = nil) async throws {
         let settings = await center.notificationSettings()
         guard [.authorized, .provisional, .ephemeral].contains(settings.authorizationStatus) else {
@@ -24,7 +25,8 @@ final class NotificationService: NSObject, UNUserNotificationCenterDelegate {
         }
         let content = UNMutableNotificationContent()
         content.title = String(title.prefix(80))
-        content.body = String(body.prefix(240))
+        let showsPreview = UserDefaults.standard.object(forKey: Self.previewPreferenceKey) as? Bool ?? true
+        content.body = String((showsPreview ? body : "有一条新消息，点击查看。").prefix(240))
         content.sound = .default
         content.badge = 1
         content.userInfo = route?.userInfo ?? [:]
