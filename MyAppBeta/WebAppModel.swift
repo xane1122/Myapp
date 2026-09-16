@@ -151,7 +151,7 @@ final class WebAppModel: NSObject, ObservableObject, WKNavigationDelegate, WKUID
     func webView(_ webView: WKWebView, runJavaScriptAlertPanelWithMessage message: String,
                  initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping () -> Void) {
         guard let presenter else { completionHandler(); return }
-        let alert = UIAlertController(title: "MyApp Beta", message: message, preferredStyle: .alert)
+        let alert = UIAlertController(title: "Rhys", message: message, preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "好", style: .default) { _ in completionHandler() })
         presenter.present(alert, animated: true)
     }
@@ -159,7 +159,7 @@ final class WebAppModel: NSObject, ObservableObject, WKNavigationDelegate, WKUID
     func webView(_ webView: WKWebView, runJavaScriptConfirmPanelWithMessage message: String,
                  initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping (Bool) -> Void) {
         guard let presenter else { completionHandler(false); return }
-        let alert = UIAlertController(title: "MyApp Beta", message: message, preferredStyle: .alert)
+        let alert = UIAlertController(title: "Rhys", message: message, preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "取消", style: .cancel) { _ in completionHandler(false) })
         alert.addAction(UIAlertAction(title: "确定", style: .default) { _ in completionHandler(true) })
         presenter.present(alert, animated: true)

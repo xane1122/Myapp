@@ -9,7 +9,7 @@ import xml.etree.ElementTree as ET
 root = Path(__file__).resolve().parents[1]
 subprocess.run([sys.executable, str(root / 'tools/generate_project.py')], check=True)
 plist = plistlib.loads((root / 'MyAppBeta/Info.plist').read_bytes())
-assert plist['CFBundleDisplayName'] == 'MyApp Beta'
+assert plist['CFBundleDisplayName'] == 'Rhys'
 assert plist['CFBundleIdentifier'] == '$(PRODUCT_BUNDLE_IDENTIFIER)'
 assert plist['CFBundleURLTypes'][0]['CFBundleURLSchemes'] == ['myapp-beta']
 assert 'NSCameraUsageDescription' in plist

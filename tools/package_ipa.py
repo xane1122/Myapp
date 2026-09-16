@@ -13,7 +13,7 @@ def package(app, output):
     plist = plistlib.loads((app / 'Info.plist').read_bytes())
     assert plist['CFBundleIdentifier'] == 'com.xanelove.myapp.beta', 'Refusing non-Beta bundle'
     assert plist['CFBundleIdentifier'] != 'com.example.MyWebApp'
-    assert plist['CFBundleDisplayName'] == 'MyApp Beta'
+    assert plist['CFBundleDisplayName'] == 'Rhys'
     assert 'iPhoneOS' in plist['CFBundleSupportedPlatforms'], 'Simulator builds are not installable IPAs'
     binary = app / plist['CFBundleExecutable']
     data = binary.read_bytes()

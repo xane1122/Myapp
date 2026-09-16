@@ -2,7 +2,7 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0"><dict>
  <key>CFBundleDevelopmentRegion</key><string>zh-Hans</string>
- <key>CFBundleDisplayName</key><string>MyApp Beta</string>
+ <key>CFBundleDisplayName</key><string>Rhys</string>
  <key>CFBundleExecutable</key><string>$(EXECUTABLE_NAME)</string>
  <key>CFBundleIdentifier</key><string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
  <key>CFBundleInfoDictionaryVersion</key><string>6.0</string>
@@ -16,8 +16,8 @@
   <key>CFBundleURLSchemes</key><array><string>myapp-beta</string></array>
  </dict></array>
  <key>LSRequiresIPhoneOS</key><true/>
- <key>NSCameraUsageDescription</key><string>MyApp Beta 仅在你选择拍照时使用相机，用于发送聊天照片或添加配图。</string>
- <key>NSPhotoLibraryUsageDescription</key><string>MyApp Beta 使用系统照片选择器读取你主动选择的照片。</string>
+ <key>NSCameraUsageDescription</key><string>Rhys 仅在你选择拍照时使用相机，用于发送聊天照片或添加配图。</string>
+ <key>NSPhotoLibraryUsageDescription</key><string>Rhys 使用系统照片选择器读取你主动选择的照片。</string>
  <key>UIApplicationSupportsIndirectInputEvents</key><true/>
  <key>UILaunchScreen</key><dict><key>UIColorName</key><string>LaunchBackground</string></dict>
  <key>UIRequiresFullScreen</key><false/>

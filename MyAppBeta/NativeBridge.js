@@ -139,7 +139,7 @@
       const button = document.createElement('button');
       button.id = 'myapp-beta-settings';
       button.type = 'button';
-      button.textContent = 'MyApp Beta · 通知与应用设置';
+      button.textContent = 'Rhys · 通知与应用设置';
       button.addEventListener('click', () => api.openSettings().catch(error => {
         if (typeof window.toast === 'function') window.toast(error.message);
       }));

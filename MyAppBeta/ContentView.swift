@@ -44,7 +44,7 @@ private struct BetaSettingsView: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section("MyApp Beta") {
+                Section("Rhys") {
                     Text("独立安装，连接现有 MyApp 网站。聊天数据与正式版共用，设备上的网页存储独立保存。")
                     Button("重新加载网页") { model.reload(); dismiss() }
                 }
@@ -59,7 +59,7 @@ private struct BetaSettingsView: View {
                     Button("5 秒后发送测试通知") {
                         Task {
                             do {
-                                try await NotificationService.shared.schedule(route: nil, body: "这是 MyApp Beta 的本地通知。", delay: 5)
+                                try await NotificationService.shared.schedule(route: nil, body: "这是 Rhys 的本地通知。", delay: 5)
                                 result = "已预约；可切到后台测试声音与角标。"
                             } catch { result = error.localizedDescription }
                         }

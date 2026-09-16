@@ -1,8 +1,8 @@
-# MyApp Beta
+# Rhys
 
 可长期维护的 SwiftUI + WKWebView iOS 壳，加载 `https://xanelove.com`，与现有正式版同时安装。
 
-- 显示名称：MyApp Beta
+- 显示名称：Rhys
 - Bundle ID：`com.xanelove.myapp.beta`
 - 已检查的旧 IPA Bundle ID：`com.example.MyWebApp`
 - 最低系统：iOS 16
