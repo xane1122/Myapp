@@ -22,7 +22,8 @@ enum ImageNormalizer {
         let bytes = (try url.resourceValues(forKeys: [.fileSizeKey])).fileSize ?? 0
         guard bytes <= 40 * 1024 * 1024 else { throw BetaError.message("文件超过 40 MB，请先缩小后再选。") }
         let ext = url.pathExtension.lowercased()
-        if ext != "gif", let source = CGImageSourceCreateWithURL(url as CFURL, nil) {
+        let type = UTType(filenameExtension: ext)
+        if type?.conforms(to: .image) == true, ext != "gif", let source = CGImageSourceCreateWithURL(url as CFURL, nil) {
             let options: [CFString: Any] = [kCGImageSourceCreateThumbnailFromImageAlways: true,
                                            kCGImageSourceCreateThumbnailWithTransform: true,
                                            kCGImageSourceThumbnailMaxPixelSize: 2048,
