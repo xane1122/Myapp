@@ -4,6 +4,16 @@ import WebKit
 @testable import MyAppBeta
 
 final class BetaTests: XCTestCase {
+    func testDocumentFilesBypassImageDecoding() throws {
+        let url = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString).appendingPathExtension("txt")
+        let data = Data("TXT 正文用于原生文件上传回归".utf8)
+        try data.write(to: url)
+        defer { try? FileManager.default.removeItem(at: url) }
+        let file = try ImageNormalizer.file(url)
+        XCTAssertEqual(file["name"] as? String, url.lastPathComponent)
+        XCTAssertEqual(file["type"] as? String, "text/plain")
+        XCTAssertEqual(Data(base64Encoded: file["base64"] as? String ?? ""), data)
+    }
     func testBundleIsolationAndOriginBoundary() {
         XCTAssertNotEqual(AppConfiguration.bundleID, AppConfiguration.legacyBundleID)
         XCTAssertTrue(AppConfiguration.backgroundResultsEnabled)
