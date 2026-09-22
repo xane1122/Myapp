@@ -10,3 +10,7 @@ xcuserdata/
 *.xcarchive
 __pycache__/
 .env
+*.db
+*.db-*
+.env.*
+!.env.example

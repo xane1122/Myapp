@@ -4,10 +4,11 @@ on:
   push:
     branches: [main, beta, 'beta/**']
     paths:
-      - 'MyAppBeta/**'
-      - 'MyAppBetaTests/**'
-      - 'MyAppBeta.xcodeproj/**'
-      - 'tools/**'
+      - 'ios-swift/MyAppBeta/**'
+      - 'ios-swift/MyAppBetaTests/**'
+      - 'ios-swift/MyAppBeta.xcodeproj/**'
+      - 'ios-swift/tools/**'
+      - 'ios-swift/tests/**'
       - '.github/workflows/beta-ios.yml'
 permissions:
   contents: read
@@ -23,21 +24,24 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Validate source and bridge
+        working-directory: ios-swift
         run: |
           python3 tools/check_project.py
           node --test tests/bridge.test.cjs
       - name: Compile iOS unit tests
+        working-directory: ios-swift
         run: bash tools/test_ios.sh
       - name: Build unsigned device IPA
+        working-directory: ios-swift
         run: bash tools/build_ipa.sh
       - name: Upload SideStore package
         uses: actions/upload-artifact@v4
         with:
           name: MyApp-Beta-unsigned-${{ github.run_number }}
           path: |
-            build/MyApp-Beta-unsigned.ipa
-            build/MyApp-Beta-unsigned.json
-            build/SHA256SUMS.txt
+            ios-swift/build/MyApp-Beta-unsigned.ipa
+            ios-swift/build/MyApp-Beta-unsigned.json
+            ios-swift/build/SHA256SUMS.txt
           if-no-files-found: error
           retention-days: 14
       - name: Upload validation logs
@@ -46,8 +50,8 @@ jobs:
         with:
           name: MyApp-Beta-checks-${{ github.run_number }}
           path: |
-            build/*.log
-            build/*xcresult
-            build/xcode-version.txt
+            ios-swift/build/*.log
+            ios-swift/build/*xcresult
+            ios-swift/build/xcode-version.txt
           if-no-files-found: ignore
           retention-days: 7

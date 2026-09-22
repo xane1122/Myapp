@@ -1,0 +1,12 @@
+.env
+.env.*
+!.env.example
+*.db
+*.db-*
+uploads/
+backups/
+build/
+dist/
+*.ipa
+*.mobileprovision
+.DS_Store

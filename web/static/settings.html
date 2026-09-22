@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#F8F1F1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>设置与资源</title>
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
+<link rel="stylesheet" href="/styles.css?v=20260812-settings-subpage-fix">
+<link rel="stylesheet" href="/bubble-skins.css?v=20260912-3">
+</head>
+<body class="workbench-body">
+<div class="workbench settings-workbench">
+  <button id="settingsBack" class="settings-back" type="button" onclick="settingsBack()" title="返回" aria-label="返回">‹</button>
+  <main class="workbench-main">
+    <nav id="settingsMenu" class="settings-menu" aria-label="设置选项">
+      <button class="settings-profile-card" type="button" onclick="openSettingsSection('basic','个人资料')">
+        <span class="settings-profile-avatar" id="settingsProfileAvatar">你</span>
+        <span class="settings-profile-copy"><strong id="settingsProfileName">我的资料</strong><small id="settingsProfileSubtitle">个人资料与偏好</small></span>
+        <i>›</i>
+      </button>
+      <div class="settings-menu-group">
+        <button type="button" onclick="openSettingsSection('basic','基础设置')"><span>基础设置</span><i>›</i></button>
+        <button type="button" onclick="openSettingsSection('wallpaper','壁纸与外观')"><span>壁纸与外观</span><i>›</i></button>
+        <button type="button" onclick="openSettingsSection('persona','人设')"><span>人设</span><i>›</i></button>
+      </div>
+      <div class="settings-menu-group">
+        <button type="button" onclick="openSettingsSection('docs','历史文档')"><span>历史文档</span><i>›</i></button>
+        <button type="button" onclick="openSettingsSection('stickers','表情包')"><span>表情包</span><i>›</i></button>
+      </div>
+      <div class="settings-menu-group">
+        <button type="button" onclick="openSettingsSection('wake','自主唤醒')"><span>自主唤醒</span><i>›</i></button>
+      </div>
+      <div class="settings-menu-group">
+        <button type="button" onclick="goContext()"><span>上下文</span><i>›</i></button>
+      </div>
+    </nav>
+    <section id="tab-basic" class="workbench-pane">
+      <div class="panel">
+        <div class="grid settings-grid">
+          <div class="field wide persona-tabs"><button type="button" class="secondary active" id="persona-tab-rhys" onclick="switchPersonaChannel('rhys')">Rhys</button><button type="button" class="secondary" id="persona-tab-grok" onclick="switchPersonaChannel('grok')">Tail</button></div>
+          <div class="field wide channel-settings channel-rhys"><strong>Rhys · 通道 A 主回复</strong><small>Rhys 的 Key、Base URL 和模型完全独立</small></div>
+          <div class="field wide channel-settings channel-rhys"><label>Rhys 助手名称</label><input id="s-reply-assistant-name" placeholder="Rhys"></div>
+          <div class="field wide channel-settings channel-rhys"><label>Rhys API Key</label><input id="s-api-key" type="text" autocomplete="off"><small id="reply-key-status" class="wake-hint"></small></div>
+          <div class="field wide channel-settings channel-rhys"><label>Rhys Base URL</label><input id="s-api-base-url" type="url" placeholder="https://provider.example/v1"></div>
+          <div class="field wide channel-settings channel-rhys"><label>Rhys 模型</label><div class="model-picker"><input id="s-model" placeholder="Rhys 主回复模型"><button id="fetch-models-button" class="secondary" type="button" onclick="fetchProviderModels('reply')">拉取模型</button></div><select id="provider-model-select" class="provider-model-select" hidden onchange="selectProviderModel(this.value,'reply')"><option value="">请选择模型</option></select><small id="model-fetch-status" class="wake-hint"></small></div>
+          <div class="field wide channel-settings channel-grok"><strong>Tail · 通道 A 主回复</strong><small>Tail 的 Key、Base URL 和模型完全独立</small></div>
+          <div class="field wide channel-settings channel-grok"><label>Tail 助手名称</label><input id="s-grok-assistant-name" placeholder="Tail"></div>
+          <div class="field wide channel-settings channel-grok"><label>Tail API Key</label><input id="s-grok-api-key" type="text" autocomplete="off"><small id="grok-key-status" class="wake-hint"></small></div>
+          <div class="field wide channel-settings channel-grok"><label>Tail Base URL</label><input id="s-grok-api-base-url" type="url" placeholder="https://provider.example/v1"></div>
+          <div class="field wide channel-settings channel-grok"><label>Tail 模型</label><div class="model-picker"><input id="s-grok-model" placeholder="Tail 主回复模型"><button id="fetch-grok-models-button" class="secondary" type="button" onclick="fetchProviderModels('grok')">拉取模型</button></div><select id="grok-provider-model-select" class="provider-model-select" hidden onchange="selectProviderModel(this.value,'grok')"><option value="">请选择模型</option></select><small id="grok-model-fetch-status" class="wake-hint"></small></div>
+          <div class="field wide channel-settings channel-rhys"><strong>Rhys · 通道 B 工具模型</strong><small>三项全部留空时由 Rhys 通道 A 接管工具调用</small></div>
+          <div class="field wide channel-settings channel-rhys"><label>Rhys B API Key</label><input id="s-memory-api-key" type="text" autocomplete="off"><small id="memory-key-status" class="wake-hint"></small></div>
+          <div class="field wide channel-settings channel-rhys"><label>Rhys B Base URL</label><input id="s-memory-api-base-url" type="url" placeholder="留空则由 Rhys A 接管"></div>
+          <div class="field wide channel-settings channel-rhys"><label>Rhys B 模型</label><div class="model-picker"><input id="s-memory-model" placeholder="留空则由 Rhys A 接管"><button id="fetch-memory-models-button" class="secondary" type="button" onclick="fetchProviderModels('memory')">拉取模型</button></div><select id="memory-provider-model-select" class="provider-model-select" hidden onchange="selectProviderModel(this.value,'memory')"><option value="">请选择模型</option></select><small id="memory-model-fetch-status" class="wake-hint"></small></div>
+          <div class="field wide channel-settings channel-grok"><strong>Tail · 通道 B 工具模型</strong><small>三项全部留空时由 Tail 通道 A 接管工具调用</small></div>
+          <div class="field wide channel-settings channel-grok"><label>Tail B API Key</label><input id="s-memory-grok-api-key" type="text" autocomplete="off"><small id="memory-grok-key-status" class="wake-hint"></small></div>
+          <div class="field wide channel-settings channel-grok"><label>Tail B Base URL</label><input id="s-memory-grok-api-base-url" type="url" placeholder="留空则由 Tail A 接管"></div>
+          <div class="field wide channel-settings channel-grok"><label>Tail B 模型</label><div class="model-picker"><input id="s-memory-grok-model" placeholder="留空则由 Tail A 接管"><button id="fetch-memory-grok-models-button" class="secondary" type="button" onclick="fetchProviderModels('memory_grok')">拉取模型</button></div><select id="memory-grok-provider-model-select" class="provider-model-select" hidden onchange="selectProviderModel(this.value,'memory_grok')"><option value="">请选择模型</option></select><small id="memory-grok-model-fetch-status" class="wake-hint"></small></div>
+          <div class="field wide display-settings"><span class="label">角色消息显示</span><label class="setting-toggle"><input id="s-show-thought" type="checkbox"><span>显示角色内心</span><small>在对话气泡上方显示可折叠的“thinking”栏</small></label><label class="setting-toggle"><input id="s-show-action" type="checkbox"><span>显示角色动作</span><small>在对话气泡外显示较细的动作文字（默认开启）</small></label></div>
+          <div class="field wide"><label id="persona-channel-label">Rhys 人物设定</label><small>切换通道后，下面的人设字段完全独立保存。</small></div>
+          <div class="field wide"><label>追加系统提示词（只写额外规则，不要混写名字/关系/喜好）</label><textarea id="s-prompt"></textarea></div>
+          <div class="field"><label>助手名字</label><input id="s-assistant-name"></div>
+          <div class="field"><label>你的名字</label><input id="s-name"></div>
+          <div class="field"><label>关系定位</label><textarea id="s-relationship"></textarea></div>
+          <div class="field"><label>说话风格</label><textarea id="s-tone"></textarea></div>
+          <div class="field"><label>用户喜欢</label><textarea id="s-likes"></textarea></div>
+          <div class="field"><label>用户不喜欢 / 雷区</label><textarea id="s-dislikes"></textarea></div>
+          <div class="field wide"><label>边界和禁忌</label><textarea id="s-boundaries"></textarea></div>
+          <div class="field wide"><label>长期记忆保留规则</label><textarea id="s-memory-policy"></textarea></div>
+        </div>
+        <div class="action-row"><button class="primary" onclick="saveSettings()">保存设置</button><button class="secondary danger" onclick="deleteCurrentConversation()">删除当前对话</button></div>
+      </div>
+    </section>
+
+    <section id="tab-wallpaper" class="workbench-pane">
+      <div class="panel wallpaper-settings-panel">
+        <div class="panel-head"><span class="label" id="wallpaperPanelTitle">全部页面默认外观</span></div>
+        <div class="field wallpaper-target-field"><label for="wallpaperTargets">选择更换壁纸的页面</label><select id="wallpaperTargets" class="wallpaper-target-select" onchange="switchWallpaperTarget(this.value)" aria-label="选择更换壁纸的页面"></select></div>
+        <div id="wallpaperPreview" class="wallpaper-preview"><div class="wallpaper-preview-image"></div><div class="wallpaper-preview-chrome"><small>8月7日 星期五</small><strong>9:41</strong></div><span>当前使用默认壁纸</span></div>
+        <div class="wallpaper-adjustments"><button type="button" onclick="resetWallpaperPosition()" title="居中" aria-label="壁纸居中">⌖</button><input id="wallpaperZoom" type="range" min="1" max="2" step="0.01" value="1" oninput="updateWallpaperZoom(this.value)" aria-label="壁纸缩放"><span aria-hidden="true">＋</span></div>
+        <div class="field wallpaper-color-field"><label>图标颜色</label><div class="wallpaper-colors" id="wallpaperColors"><button type="button" data-color="#cfaeb5" style="--swatch:#cfaeb5" onclick="setWallpaperIconColor(this.dataset.color)" aria-label="浅粉"></button><button type="button" data-color="#e05a67" style="--swatch:#e05a67" onclick="setWallpaperIconColor(this.dataset.color)" aria-label="红色"></button><button type="button" data-color="#e09a3e" style="--swatch:#e09a3e" onclick="setWallpaperIconColor(this.dataset.color)" aria-label="橙色"></button><button type="button" data-color="#4d9b69" style="--swatch:#4d9b69" onclick="setWallpaperIconColor(this.dataset.color)" aria-label="绿色"></button><button type="button" data-color="#4387d0" style="--swatch:#4387d0" onclick="setWallpaperIconColor(this.dataset.color)" aria-label="蓝色"></button><button type="button" data-color="#7557b8" style="--swatch:#7557b8" onclick="setWallpaperIconColor(this.dataset.color)" aria-label="紫色"></button><label class="wallpaper-custom-color" title="自定义颜色"><input id="wallpaperIconColor" type="color" value="#cfaeb5" oninput="setWallpaperIconColor(this.value)" aria-label="自定义图标颜色"><span>＋</span></label><button class="wallpaper-color-reset" type="button" onclick="setWallpaperIconColor('')" title="默认颜色" aria-label="恢复默认图标颜色">×</button></div></div>
+        <div class="field"><label>选择一张图片</label><div class="file-row"><input id="wallpaper-file" type="file" accept="image/*" aria-hidden="true" tabindex="-1"><label class="file-pick" for="wallpaper-file" data-file-trigger="wallpaper-file" role="button" tabindex="0">选择图片</label><span class="file-name" data-for="wallpaper-file">未选择任何文件</span></div><small>每个页面独立保存；没有单独设置的页面会使用“全部”里的默认外观。</small></div>
+        <div class="action-row"><button id="wallpaperApply" class="primary" type="button" onclick="applySelectedWallpaper()">应用到当前页面</button><button class="secondary danger" type="button" onclick="resetWallpaper()">恢复当前默认</button></div>
+        <div class="action-row"><button id="wallpaperSync" class="secondary" type="button" onclick="migrateWallpaper()">将这台设备的壁纸同步到其他设备</button></div>
+        <small id="wallpaperSyncStatus">首次同步请在保存着最新壁纸的设备上执行；之后各设备会自动同步。</small>
+      </div>
+    </section>
+
+    <section id="tab-persona" class="workbench-pane">
+      <div class="split">
+        <div class="panel">
+          <div class="field"><label>标题</label><input id="persona-title" placeholder="例如：温柔陪伴版"></div>
+          <div class="field"><label>直接填写人物设定</label><textarea id="persona-text" class="tall"></textarea></div>
+          <div class="field"><label>或上传 txt/md/pdf</label><div class="file-row"><input id="persona-file" type="file" accept=".txt,.md,.pdf" aria-hidden="true" tabindex="-1"><label class="file-pick" for="persona-file" data-file-trigger="persona-file" role="button" tabindex="0">选择文件</label><span class="file-name" data-for="persona-file">未选择任何文件</span></div></div>
+          <div class="action-row"><button class="secondary" onclick="uploadPersona(false)">保存不启用</button><button class="primary" onclick="uploadPersona(true)">保存并启用</button></div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><span class="label">已有人设</span><button class="secondary mini" onclick="loadPersonas()">刷新</button></div>
+          <div id="personaList" class="resource-list"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="tab-docs" class="workbench-pane">
+      <div class="split">
+        <div class="panel">
+          <div class="field"><label>标题</label><input id="doc-title" placeholder="历史聊天记录"></div>
+          <div class="field"><label>上传 txt/md/pdf，上传后立即生成全局长期记忆</label><div class="file-row"><input id="doc-file" type="file" accept=".txt,.md,.pdf" aria-hidden="true" tabindex="-1"><label class="file-pick" for="doc-file" data-file-trigger="doc-file" role="button" tabindex="0">选择文件</label><span class="file-name" data-for="doc-file">未选择任何文件</span></div></div>
+          <button class="primary" onclick="uploadDoc()">上传历史文档</button>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><span class="label">文档状态</span><button class="secondary mini" onclick="loadDocs()">刷新</button></div>
+          <div id="docList" class="resource-list"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="tab-stickers" class="workbench-pane">
+      <div class="split stickers-split">
+        <div class="panel">
+          <div class="field"><label>上传表情包图片，上传后双击修改标签</label><div class="file-row"><input id="sticker-file" type="file" accept="image/*" multiple aria-hidden="true" tabindex="-1"><label class="file-pick" for="sticker-file" data-file-trigger="sticker-file" role="button" tabindex="0">选择文件</label><span class="file-name" data-for="sticker-file">未选择任何文件</span></div></div>
+          <div id="stickerPasteZone" class="paste-zone" tabindex="0" ondrop="handleStickerDrop(event)" ondragover="event.preventDefault()">粘贴图片</div>
+          <div class="previews sticker-previews" id="stickerPreviews"></div>
+          <div class="action-row"><button class="primary" onclick="uploadSticker()">上传表情包</button><button class="secondary" onclick="clearPendingStickers('manual')">清空预览</button></div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><span class="label">表情包库</span><button class="secondary mini" onclick="loadStickers()">刷新</button></div>
+          <div id="stickerList" class="resource-list sticker-library"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="tab-wake" class="workbench-pane">
+      <div class="split">
+        <div class="panel">
+          <div class="field wide display-settings"><span class="label">Rhys 自主唤醒</span><label class="setting-toggle"><input id="wake-enabled" type="checkbox"><span>允许主动发消息</span><small>Rhys 会结合最近对话自行决定发送或等待；默认关闭</small></label></div>
+          <div class="field wide display-settings"><span class="label">手机通知</span><label class="setting-toggle"><input id="wake-push-preview" type="checkbox" checked><span>在通知中显示消息内容</span><small>关闭后只显示“Rhys 给你发了一条消息”</small></label></div>
+          <div class="action-row"><button class="secondary" onclick="enablePhonePush()">开启手机推送</button><button class="secondary" onclick="testPhonePush()">发送测试通知</button><button class="secondary danger" onclick="disablePhonePush()">关闭本机推送</button></div>
+          <small id="push-status" class="wake-hint">正在检查推送状态…</small>
+          <div class="grid settings-grid">
+            <div class="field"><label>最短沉默时间（分钟）</label><input id="wake-silence" type="number" min="5" max="10080" value="180"></div>
+            <div class="field"><label>离开页面至少（分钟）</label><input id="wake-activity-grace" type="number" min="1" max="1440" value="10"></div>
+            <div class="field"><label>发送冷却（分钟）</label><input id="wake-cooldown" type="number" min="5" max="20160" value="360"></div>
+            <div class="field"><label>模型判断冷却（分钟）</label><input id="wake-evaluation-cooldown" type="number" min="5" max="20160" value="30"><small>发送、等待或失败后都进入冷却</small></div>
+            <div class="field"><label>每天最多主动消息</label><input id="wake-limit" type="number" min="1" max="500" value="2"></div>
+            <div class="field"><label>每天最多模型判断</label><input id="wake-evaluation-limit" type="number" min="1" max="500" value="50"><small>达到上限后当天不再自动调用模型</small></div>
+            <div class="field"><label>每轮触发概率（0–100%）</label><input id="wake-probability" type="number" min="0" max="100" value="35"></div>
+            <div class="field"><label>勿扰开始（北京时间）</label><input id="wake-quiet-start" type="time" value="23:30"></div>
+            <div class="field"><label>勿扰结束（北京时间）</label><input id="wake-quiet-end" type="time" value="08:00"></div>
+            <div class="field wide"><label>备用会话 ID</label><input id="wake-conversation" type="number" min="1"><small>每轮会自动使用最近发送过用户消息的聊天窗口；仅在没有聊天记录时使用此 ID。</small></div>
+            <div class="field wide"><label>模型通道</label><small id="wake-key-status">自主唤醒跟随 Rhys 的 API Key 与 Base URL。</small></div>
+            <div class="field wide"><label>模型</label><input id="wake-model"></div>
+            <div class="field wide"><label>专用提示词</label><textarea id="wake-prompt" rows="12"></textarea></div>
+          </div>
+          <small id="wake-key-status" class="wake-hint"></small>
+          <div class="action-row"><button class="primary" onclick="saveWakeSettings()">保存自主唤醒</button><button class="secondary" onclick="testWakeNow()">让 Rhys 现在判断一次</button></div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><span class="label">最近判断记录</span><button class="secondary mini" onclick="loadWakeEvents()">刷新</button></div>
+          <div id="wakeEventList" class="resource-list wake-event-list"><div class="memory-empty">暂无记录</div></div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div id="toast"></div>
+<div id="personaDetail" class="modal persona-detail-modal" onclick="closePersonaDetail(event)">
+  <div class="sheet persona-detail-sheet" role="dialog" aria-modal="true" aria-labelledby="personaDetailTitle">
+    <div class="handle"></div>
+    <div class="persona-detail-head"><strong id="personaDetailTitle">人物设定详情</strong><button class="icon-btn" type="button" onclick="hidePersonaDetail()" title="关闭" aria-label="关闭">×</button></div>
+    <label class="field"><span>人物设定内容</span><textarea id="personaDetailText" class="persona-detail-text"></textarea></label>
+    <div class="persona-detail-actions"><button class="secondary" type="button" onclick="copyPersonaDetail()">复制</button><button class="primary" type="button" onclick="savePersonaDetail()">保存</button></div>
+  </div>
+</div>
+<div id="imageViewer" class="image-modal" onclick="closeImageViewer(event)"><button onclick="hideImageViewer()">×</button><img id="imageViewerImg" alt="预览图片"></div>
+<script src="/native-feel.js?v=11"></script>
+<script src="/wallpaper.js?v=2"></script>
+<script src="/image-normalize.js?v=20260911-1"></script>
+<script src="/auth-config.js"></script>
+<script src="/api-auth.js?v=7"></script>
+<script>
+const LOCAL_API_KEY='myassistant.openrouter_api_key', LOCAL_API_BASE_URL='myassistant.openrouter_base_url', LOCAL_MODEL='myassistant.main_model', LOCAL_CONVERSATION='myassistant.conversation_id', LOCAL_SHOW_THOUGHT='myassistant.show_role_thought', LOCAL_SHOW_ACTION='myassistant.show_role_action';
+const LOCAL_CONVERSATION_CACHE='myassistant.conversations_cache', LOCAL_HISTORY_PREFIX='myassistant.history.', LOCAL_HISTORY_FULL_PREFIX='myassistant.history_full.';let personaChannel=localStorage.getItem('myassistant.persona_channel')==='grok'?'grok':'rhys';
+const DEFAULT_MODEL='anthropic/claude-sonnet-4-6';
+let currentConversationID=Number(new URLSearchParams(location.search).get('conversation_id')||localStorage.getItem(LOCAL_CONVERSATION)||1);
+const WALLPAPER_TARGETS=[['all','全部'],['home','首页'],['chat','聊天'],['context','上下文'],['catroom','猫窝'],['bell','铃铛'],['album','贴贴'],['games','游戏'],['ledger','账本'],['notes','小纸条'],['roleplay','过家家'],['training','调教室'],['daily-log','日迹'],['notebook','本子'],['days-matter','倒数日'],['mailbox','留言箱'],['diary','日记'],['settings','设置']];
+let activeTab='menu', pendingStickers=[], isUploadingStickers=false, pasteImageSeq=0, editingPersona=null, settingsInitial={}, wallpaperTarget='all',wallpaperDraft={file:null,url:'',x:50,y:50,zoom:1,iconColor:''},wallpaperDrag=null;
+localStorage.setItem(LOCAL_CONVERSATION,String(currentConversationID));
+
+function clientLog(event,details={}){
+  const payload=JSON.stringify({event,conversation_id:currentConversationID,details});
+  try{console.info('[myapp]',{event,conversation_id:currentConversationID,details})}catch{}
+  try{fetch('/api/client-events',{method:'POST',headers:{'Content-Type':'application/json'},body:payload,keepalive:true}).catch(()=>{})}catch{}
+}
+
+window.addEventListener('error',e=>clientLog('window_error',{message:e.message,source:e.filename,line:e.lineno,column:e.colno}));
+window.addEventListener('unhandledrejection',e=>clientLog('unhandled_rejection',{reason:String(e.reason&&e.reason.message||e.reason||'unknown')}));
+function apiKey(){return''}
+function apiBaseURL(){return localStorage.getItem(LOCAL_API_BASE_URL)||''}
+function model(){return localStorage.getItem(LOCAL_MODEL)||DEFAULT_MODEL}
+function escapeHtml(value){return String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]))}
+function goHome(){location.href='/?conversation_id='+encodeURIComponent(currentConversationID)}
+function goContext(){location.href='/context.html?conversation_id='+encodeURIComponent(currentConversationID)}
+function settingsBack(){if(activeTab==='menu')goHome();else showSettingsMenu()}
+const SHARED_PERSONA_KEYS=new Set(['user_name','likes','dislikes','boundaries','memory_policy']);function personaKey(key){return SHARED_PERSONA_KEYS.has(key)?key:key+'.'+personaChannel}function personaFields(){return {system_prompt:'s-prompt',assistant_name:'s-assistant-name',user_name:'s-name',relationship:'s-relationship',tone:'s-tone',likes:'s-likes',dislikes:'s-dislikes',boundaries:'s-boundaries',memory_policy:'s-memory-policy'}}async function switchPersonaChannel(channel){personaChannel=channel==='grok'?'grok':'rhys';localStorage.setItem('myassistant.persona_channel',personaChannel);applyChannelView();await Promise.all([loadPrefs(),loadModelChannels()])}
+function applyChannelView(){document.querySelectorAll('.channel-settings').forEach(el=>el.hidden=!el.classList.contains('channel-'+personaChannel));document.querySelectorAll('[id^="persona-tab-"]').forEach(x=>x.classList.toggle('active',x.id==='persona-tab-'+personaChannel));const name=personaChannel==='grok'?'Tail':'Rhys';document.getElementById('persona-channel-label').textContent=name+' 人物设定'}
+
+async function init(){clientLog('settings_init',{href:location.href});localStorage.removeItem(LOCAL_API_KEY);localStorage.removeItem('myassistant.grok_api_key');bindFilePickers();await WallpaperManager.ready;initWallpaperEditor();updateWallpaperSyncStatus();applyChannelView();showSettingsMenu();await loadAll();if('serviceWorker'in navigator)navigator.serviceWorker.register('/sw.js?v=941').then(reg=>reg.update()).catch(()=>{})}
+async function loadAll(){document.getElementById('settingsStatus')?.replaceChildren();await Promise.allSettled([loadPrefs(),loadModelChannels(),loadPersonas(),loadDocs(),loadStickers(),loadWakeSettings(),loadWakeEvents(),refreshPushStatus()])}
+function openSettingsSection(name,title){activeTab=name;document.getElementById('settingsMenu').hidden=true;document.querySelectorAll('.workbench-pane').forEach(p=>p.classList.remove('active'));document.getElementById('tab-'+name).classList.add('active');document.getElementById('settingsTitle')?.replaceChildren();document.querySelector('.workbench-main').scrollTop=0;if(name==='stickers')document.getElementById('stickerPasteZone')?.focus()}
+function showSettingsMenu(){activeTab='menu';document.querySelectorAll('.workbench-pane').forEach(p=>p.classList.remove('active'));document.getElementById('settingsMenu').hidden=false;document.getElementById('settingsTitle')?.replaceChildren();document.querySelector('.workbench-main').scrollTop=0}
+function bindFilePickers(){
+  document.querySelectorAll('[data-file-trigger]').forEach(trigger=>{
+    const id=trigger.dataset.fileTrigger;
+    trigger.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();document.getElementById(id)?.click()}});
+  });
+  document.querySelectorAll('.file-row input[type=file]').forEach(input=>{
+    input.addEventListener('change',async()=>{showSelectedFileName(input);if(input.id==='sticker-file')await queueSelectedStickerFiles(input);if(input.id==='wallpaper-file')previewWallpaperFile(input.files?.[0])});
+  });
+}
+function showSelectedFileName(input){const files=[...(input.files||[])];const file=files[0];const label=document.querySelector(`.file-name[data-for="${input.id}"]`);if(label)label.textContent=files.length>1?`已选择 ${files.length} 个文件`:(file?file.name:'未选择任何文件')}
+function resetFileInput(id){const el=document.getElementById(id);if(el){el.value='';showSelectedFileName(el)}}
+
+function initWallpaperEditor(){const targets=document.getElementById('wallpaperTargets');targets.innerHTML=WALLPAPER_TARGETS.map(([id,name])=>`<option value="${id}">${name}</option>`).join('');const preview=document.getElementById('wallpaperPreview');preview.addEventListener('pointerdown',startWallpaperDrag);preview.addEventListener('pointermove',moveWallpaperDrag);preview.addEventListener('pointerup',endWallpaperDrag);preview.addEventListener('pointercancel',endWallpaperDrag);switchWallpaperTarget('all')}
+function switchWallpaperTarget(target){if(wallpaperDraft.url?.startsWith('blob:'))URL.revokeObjectURL(wallpaperDraft.url);wallpaperTarget=target;const config=WallpaperManager.getConfig(target),value=WallpaperManager.get(target),name=WALLPAPER_TARGETS.find(item=>item[0]===target)?.[1]||target;wallpaperDraft={file:null,url:value,x:config.x,y:config.y,zoom:config.zoom,iconColor:config.iconColor||''};document.getElementById('wallpaperTargets').value=target;document.getElementById('wallpaperPanelTitle').textContent=target==='all'?'全部页面默认外观':`${name}外观`;resetFileInput('wallpaper-file');renderWallpaperPreview()}
+async function previewWallpaperFile(file){if(!file)return;if(!String(file.type||'').startsWith('image/')||file.type==='image/svg+xml')return toast('请选择 JPG、PNG 或 WebP 图片');try{const normalized=await MyAppImages.normalize(file,{maxEdge:4096,maxBytes:20*1024*1024,quality:.9});if(wallpaperDraft.url?.startsWith('blob:'))URL.revokeObjectURL(wallpaperDraft.url);wallpaperDraft={...wallpaperDraft,file:normalized,url:URL.createObjectURL(normalized),x:50,y:50,zoom:1};renderWallpaperPreview()}catch(e){toast('无法读取这张图片')}}
+function renderWallpaperPreview(){const preview=document.getElementById('wallpaperPreview'),image=preview?.querySelector('.wallpaper-preview-image'),empty=preview?.querySelector(':scope > span'),chrome=preview?.querySelector('.wallpaper-preview-chrome');if(!preview)return;const value=wallpaperDraft.url;preview.classList.toggle('has-image',Boolean(value));image.style.backgroundImage=value?`url("${value}")`:'';image.style.backgroundPosition=`${wallpaperDraft.x}% ${wallpaperDraft.y}%`;image.style.transform=`scale(${wallpaperDraft.zoom})`;empty.hidden=Boolean(value);chrome.hidden=!value;document.getElementById('wallpaperZoom').value=wallpaperDraft.zoom;document.querySelectorAll('#wallpaperColors [data-color]').forEach(button=>button.classList.toggle('active',button.dataset.color.toLowerCase()===String(wallpaperDraft.iconColor).toLowerCase()));if(wallpaperDraft.iconColor)document.getElementById('wallpaperIconColor').value=wallpaperDraft.iconColor}
+function setWallpaperIconColor(color){wallpaperDraft.iconColor=/^#[0-9a-f]{6}$/i.test(color)?color:'';renderWallpaperPreview()}
+function updateWallpaperZoom(value){wallpaperDraft.zoom=Math.max(1,Math.min(2,Number(value)||1));renderWallpaperPreview()}
+function resetWallpaperPosition(){wallpaperDraft.x=50;wallpaperDraft.y=50;wallpaperDraft.zoom=1;renderWallpaperPreview()}
+function startWallpaperDrag(e){if(!wallpaperDraft.url)return;wallpaperDrag={id:e.pointerId,x:e.clientX,y:e.clientY,startX:wallpaperDraft.x,startY:wallpaperDraft.y};e.currentTarget.setPointerCapture(e.pointerId)}
+function moveWallpaperDrag(e){if(!wallpaperDrag||e.pointerId!==wallpaperDrag.id)return;const box=e.currentTarget.getBoundingClientRect();wallpaperDraft.x=Math.max(0,Math.min(100,wallpaperDrag.startX+(e.clientX-wallpaperDrag.x)/box.width*100));wallpaperDraft.y=Math.max(0,Math.min(100,wallpaperDrag.startY+(e.clientY-wallpaperDrag.y)/box.height*100));renderWallpaperPreview()}
+function endWallpaperDrag(e){if(wallpaperDrag?.id===e.pointerId)wallpaperDrag=null}
+async function applySelectedWallpaper(){const file=wallpaperDraft.file,button=document.getElementById('wallpaperApply'),name=WALLPAPER_TARGETS.find(item=>item[0]===wallpaperTarget)?.[1]||'当前页面';button.disabled=true;button.textContent='正在处理…';try{const config={x:wallpaperDraft.x,y:wallpaperDraft.y,zoom:wallpaperDraft.zoom,iconColor:wallpaperDraft.iconColor};if(file){const value=await WallpaperManager.setFile(file,config,wallpaperTarget);if(wallpaperDraft.url.startsWith('blob:'))URL.revokeObjectURL(wallpaperDraft.url);wallpaperDraft.file=null;wallpaperDraft.url=value}else WallpaperManager.setConfig(config,wallpaperTarget);renderWallpaperPreview();resetFileInput('wallpaper-file');toast(`已应用到${name}`)}catch(e){toast(e.message)}finally{button.disabled=false;button.textContent='应用到当前页面'}}
+async function resetWallpaper(){const name=WALLPAPER_TARGETS.find(item=>item[0]===wallpaperTarget)?.[1]||'当前页面',confirmed=window.NativeFeel?.confirm?await NativeFeel.confirm(`恢复${name}的默认外观？`):window.confirm(`恢复${name}的默认外观？`);if(!confirmed)return;WallpaperManager.reset(wallpaperTarget);switchWallpaperTarget(wallpaperTarget);toast(`已恢复${name}默认外观`)}
+function updateWallpaperSyncStatus(){const status=WallpaperManager.getSyncStatus(),el=document.getElementById('wallpaperSyncStatus');if(!el)return;el.textContent=status.error?`同步暂未完成：${status.error}`:(status.enabled?`已开启跨设备同步（版本 ${status.revision}）`:'首次同步请在保存着最新壁纸的设备上执行；之后各设备会自动同步。')}
+async function migrateWallpaper(){const button=document.getElementById('wallpaperSync');button.disabled=true;button.textContent='正在同步…';try{const result=await WallpaperManager.migrateLocal();updateWallpaperSyncStatus();toast(`已同步 ${result.count} 项壁纸设置`)}catch(e){updateWallpaperSyncStatus();toast(e.message)}finally{button.disabled=false;button.textContent='将这台设备的壁纸同步到其他设备'}}
+window.addEventListener('wallpapersync',updateWallpaperSyncStatus);window.addEventListener('wallpapersyncerror',updateWallpaperSyncStatus);
+
+function settingValue(id){return document.getElementById(id)?.value??''}function rememberSettings(ids){ids.forEach(id=>settingsInitial[id]=settingValue(id))}function changedSetting(id){return settingValue(id)!==settingsInitial[id]}
+async function loadModelChannels(){try{const d=await fetchJSON('/api/model-channels'),c=d.channels||{},reply=c.reply||{},grok=c.grok||{},memory=c.memory_rhys||{},memoryGrok=c.memory_grok||{},values={'s-reply-assistant-name':reply.assistant_name||'','s-api-key':reply.api_key||'','s-api-base-url':reply.base_url||'','s-model':reply.model||'','s-grok-assistant-name':grok.assistant_name||'','s-grok-api-key':grok.api_key||'','s-grok-api-base-url':grok.base_url||'','s-grok-model':grok.model||'','s-memory-api-key':memory.api_key||'','s-memory-api-base-url':memory.base_url||'','s-memory-model':memory.model||'','s-memory-grok-api-key':memoryGrok.api_key||'','s-memory-grok-api-base-url':memoryGrok.base_url||'','s-memory-grok-model':memoryGrok.model||''};Object.entries(values).forEach(([id,value])=>document.getElementById(id).value=value);rememberSettings(Object.keys(values));document.getElementById('reply-key-status').textContent=reply.has_api_key?'Rhys API Key 已从服务器载入。':'Rhys 尚未保存 API Key。';document.getElementById('grok-key-status').textContent=grok.has_api_key?'Tail API Key 已从服务器载入。':'Tail 尚未保存 API Key。';document.getElementById('memory-key-status').textContent=memory.has_api_key?'Rhys 通道 B 已配置。':'Rhys 通道 B 未配置，将由 Rhys A 接管工具。';document.getElementById('memory-grok-key-status').textContent=memoryGrok.has_api_key?'Tail 通道 B 已配置。':'Tail 通道 B 未配置，将由 Tail A 接管工具。'}catch(e){console.warn('loadModelChannels failed',e)}}
+function providerFields(channel){return channel==='memory'?['fetch-memory-models-button','memory-model-fetch-status','s-memory-api-key','s-memory-api-base-url','memory-provider-model-select','s-memory-model']:channel==='memory_grok'?['fetch-memory-grok-models-button','memory-grok-model-fetch-status','s-memory-grok-api-key','s-memory-grok-api-base-url','memory-grok-provider-model-select','s-memory-grok-model']:channel==='grok'?['fetch-grok-models-button','grok-model-fetch-status','s-grok-api-key','s-grok-api-base-url','grok-provider-model-select','s-grok-model']:['fetch-models-button','model-fetch-status','s-api-key','s-api-base-url','provider-model-select','s-model']}
+async function fetchProviderModels(channel='reply'){const [buttonID,statusID,keyID,baseID,selectID,modelID]=providerFields(channel),button=document.getElementById(buttonID),status=document.getElementById(statusID),key=document.getElementById(keyID).value.trim(),baseURL=document.getElementById(baseID).value.trim();if(!key)return toast('请先填写该通道的 API Key');button.disabled=true;button.textContent='拉取中…';status.textContent='正在读取服务商模型列表';try{const r=await fetch('/api/provider-models',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({api_key:key,api_base_url:baseURL})}),d=await r.json().catch(()=>({}));if(!r.ok||d.error)throw new Error(d.error||`拉取失败（${r.status}）`);const select=document.getElementById(selectID),current=document.getElementById(modelID).value;select.replaceChildren(new Option('请选择模型',''),...d.models.map(id=>new Option(id,id)));select.hidden=false;if(d.models.includes(current))select.value=current;status.textContent=`已拉取 ${d.models.length} 个模型，请直接选择`;select.focus()}catch(e){status.textContent=e.message;toast(e.message)}finally{button.disabled=false;button.textContent='拉取模型'}}
+function selectProviderModel(value,channel='reply'){if(!value)return;const [,statusID,,,,modelID]=providerFields(channel);document.getElementById(modelID).value=value;document.getElementById(statusID).textContent=`已选择：${value}`}
+async function saveSettings(){localStorage.setItem(LOCAL_SHOW_THOUGHT,String(document.getElementById('s-show-thought').checked));localStorage.setItem(LOCAL_SHOW_ACTION,String(document.getElementById('s-show-action').checked));const specs={reply:{assistant_name:'s-reply-assistant-name',api_key:'s-api-key',base_url:'s-api-base-url',model:'s-model'},grok:{assistant_name:'s-grok-assistant-name',api_key:'s-grok-api-key',base_url:'s-grok-api-base-url',model:'s-grok-model'},memory_rhys:{api_key:'s-memory-api-key',base_url:'s-memory-api-base-url',model:'s-memory-model'},memory_grok:{api_key:'s-memory-grok-api-key',base_url:'s-memory-grok-api-base-url',model:'s-memory-grok-model'}},payload={};Object.entries(specs).forEach(([channel,fields])=>{const changes={};Object.entries(fields).forEach(([key,id])=>{if(changedSetting(id))changes[key]=settingValue(id).trim()});if(Object.keys(changes).length)payload[channel]=changes});const requests=[];if(Object.keys(payload).length)requests.push(fetchJSON('/api/model-channels',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}));Object.entries(personaFields()).forEach(([key,id])=>{if(changedSetting(id))requests.push(setPref(personaKey(key),settingValue(id).trim()))});try{if(!requests.length)return toast('没有修改需要保存');await Promise.all(requests);await Promise.all([loadModelChannels(),loadPrefs()]);toast('已保存修改的内容')}catch(e){toast(e.message)}}
+function setPref(key,value){return fetch('/api/prefs',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({key,value})})}
+// Persona channel overrides: the channel namespace is the source of truth.
+async function loadPrefs(){document.getElementById('s-show-thought').checked=localStorage.getItem(LOCAL_SHOW_THOUGHT)!=='false';document.getElementById('s-show-action').checked=localStorage.getItem(LOCAL_SHOW_ACTION)!=='false';try{const p=(await (await fetch('/api/prefs',{cache:'no-store'})).json()).prefs||{},ids=[];Object.keys(personaFields()).forEach(key=>{const id=personaFields()[key],el=document.getElementById(id),value=SHARED_PERSONA_KEYS.has(key)?(p[key]??p[key+'.rhys']??''):(p[personaKey(key)]||'');if(el){el.value=value;ids.push(id)}});rememberSettings(ids);const profileName=(p.user_name||p['user_name.rhys']||'我的资料').trim(),profileSubtitle=(p['relationship.rhys']||'个人资料与偏好').trim();document.getElementById('settingsProfileName').textContent=profileName;document.getElementById('settingsProfileSubtitle').textContent=profileSubtitle;document.getElementById('settingsProfileAvatar').textContent=profileName==='我的资料'?'你':Array.from(profileName)[0];applyChannelView()}catch(e){console.warn('loadPrefs failed',e)}}
+function base64URLBytes(value){const pad='='.repeat((4-value.length%4)%4),raw=atob((value+pad).replace(/-/g,'+').replace(/_/g,'/')),out=new Uint8Array(raw.length);for(let i=0;i<raw.length;i++)out[i]=raw.charCodeAt(i);return out}
+async function pushRegistration(){if(!('serviceWorker'in navigator)||!('PushManager'in window))throw new Error('当前浏览器不支持手机推送');await navigator.serviceWorker.register('/sw.js');return navigator.serviceWorker.ready}
+function isStandaloneApp(){return window.matchMedia('(display-mode: standalone)').matches||navigator.standalone===true}
+async function refreshPushStatus(){const el=document.getElementById('push-status');if(!el)return;try{const reg=await pushRegistration(),sub=await reg.pushManager.getSubscription();if(sub){el.textContent='这台设备已开启手机推送。';return}el.textContent=isStandaloneApp()?'已从主屏幕打开，尚未开启推送。请点击“开启手机推送”。':'尚未从主屏幕 App 打开。请在 Safari 添加到主屏幕后，从桌面图标重新进入。'}catch(e){el.textContent=e.message}}
+async function enablePhonePush(){try{if(/iPhone|iPad|iPod/.test(navigator.userAgent)&&!isStandaloneApp())throw new Error('请关闭当前 Safari 标签页，从主屏幕上的 App 图标重新打开后再开启推送');const permission=await Notification.requestPermission();if(permission!=='granted')throw new Error(permission==='denied'?'通知权限已被拒绝，请到“设置 > 通知”中允许本 App 通知':'通知权限未允许');const info=await fetchJSON('/api/push'),reg=await pushRegistration();let sub=await reg.pushManager.getSubscription();if(sub){await fetch('/api/push',{method:'DELETE',headers:{'Content-Type':'application/json'},body:JSON.stringify({endpoint:sub.endpoint})});await sub.unsubscribe();sub=null}sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:base64URLBytes(info.public_key)});await fetchJSON('/api/push',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(sub)});toast('手机推送已开启');await refreshPushStatus()}catch(e){toast(e.message)}}
+async function testPhonePush(){try{await fetchJSON('/api/push/test',{method:'POST'});toast('测试通知已发送，请查看通知中心')}catch(e){toast(e.message)}}
+async function disablePhonePush(){try{const reg=await pushRegistration(),sub=await reg.pushManager.getSubscription();if(sub){await fetch('/api/push',{method:'DELETE',headers:{'Content-Type':'application/json'},body:JSON.stringify({endpoint:sub.endpoint})});await sub.unsubscribe()}toast('这台设备的推送已关闭');await refreshPushStatus()}catch(e){toast(e.message)}}
+function renderWakeSettings(d){const c=d.config||{};document.getElementById('wake-enabled').checked=!!c.enabled;document.getElementById('wake-push-preview').checked=c.push_preview!==false;document.getElementById('wake-silence').value=c.min_silence_minutes||180;document.getElementById('wake-activity-grace').value=c.activity_grace_minutes||10;document.getElementById('wake-cooldown').value=c.cooldown_minutes||360;document.getElementById('wake-evaluation-cooldown').value=c.evaluation_cooldown_minutes||30;document.getElementById('wake-limit').value=c.daily_limit||2;document.getElementById('wake-evaluation-limit').value=c.daily_evaluation_limit||50;document.getElementById('wake-probability').value=Math.round(Number(c.probability||0)*100);document.getElementById('wake-quiet-start').value=c.quiet_start||'23:30';document.getElementById('wake-quiet-end').value=c.quiet_end||'08:00';document.getElementById('wake-conversation').value=c.conversation_id||currentConversationID;document.getElementById('wake-model').value=c.model||model();document.getElementById('wake-prompt').value=c.prompt||'';document.getElementById('wake-key-status').textContent=d.has_api_key?'自主唤醒跟随 Rhys 当前的 API Key 与 Base URL。':'Rhys 尚未配置 API Key，开启自主唤醒前请先配置。'}
+async function loadWakeSettings(){try{renderWakeSettings(await fetchJSON('/api/wake/config'))}catch(e){console.warn('loadWakeSettings failed',e)}}
+async function saveWakeSettings(){const payload={enabled:document.getElementById('wake-enabled').checked,push_preview:document.getElementById('wake-push-preview').checked,conversation_id:Number(document.getElementById('wake-conversation').value||currentConversationID),min_silence_minutes:Number(document.getElementById('wake-silence').value),activity_grace_minutes:Number(document.getElementById('wake-activity-grace').value),cooldown_minutes:Number(document.getElementById('wake-cooldown').value),evaluation_cooldown_minutes:Number(document.getElementById('wake-evaluation-cooldown').value),daily_limit:Number(document.getElementById('wake-limit').value),daily_evaluation_limit:Number(document.getElementById('wake-evaluation-limit').value),probability:Number(document.getElementById('wake-probability').value)/100,quiet_start:document.getElementById('wake-quiet-start').value,quiet_end:document.getElementById('wake-quiet-end').value,model:document.getElementById('wake-model').value.trim()||model(),prompt:document.getElementById('wake-prompt').value.trim()};try{const saved=await fetchJSON('/api/wake/config',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});renderWakeSettings(saved);toast(saved.config?.enabled?'自主唤醒已开启':'自主唤醒设置已保存（当前关闭）')}catch(e){toast(e.message)}}
+async function testWakeNow(){toast('Rhys 正在判断…');try{const d=await fetchJSON('/api/wake/evaluate',{method:'POST'});toast(d.decision==='send'?'Rhys 决定主动发消息':d.decision==='wait'?'Rhys 决定先等等':(d.reason||d.decision||'判断完成'));await loadWakeEvents()}catch(e){toast(e.message)}}
+function formatBeijingTime(value){if(!value)return'';const raw=String(value),date=new Date(/[zZ]|[+-]\d\d:?\d\d$/.test(raw)?raw:raw.replace(' ','T')+'Z');return Number.isNaN(date.getTime())?raw:new Intl.DateTimeFormat('zh-CN',{timeZone:'Asia/Shanghai',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false}).format(date)}
+async function loadWakeEvents(){const box=document.getElementById('wakeEventList');if(!box)return;try{const d=await fetchJSON('/api/wake/events');const labels={send:'已发送',wait:'继续等待',error:'失败'};box.innerHTML=(d.events||[]).map(x=>`<article class="resource-item"><strong>${labels[x.decision]||x.decision}</strong><span>${escapeHtml(formatBeijingTime(x.created_at))}（北京时间） · 会话 ${Number(x.conversation_id||0)}</span><p>${escapeHtml(x.reason||'')}</p></article>`).join('')||'<div class="memory-empty">暂无判断记录</div>'}catch(e){box.innerHTML='<div class="memory-empty">记录读取失败</div>'}}
+async function deleteCurrentConversation(){if(!await NativeFeel.confirm('这会移除对话标题、聊天记录和该会话下的会话级记忆。全局长期记忆不会删除。',{title:'删除当前对话',confirmText:'删除'}))return;const deleting=currentConversationID;const r=await fetch('/api/conversations?id='+encodeURIComponent(deleting),{method:'DELETE'});const d=await r.json().catch(()=>({}));if(!r.ok||d.error)return toast(d.error||`删除失败（${r.status}）`);localStorage.removeItem(LOCAL_CONVERSATION_CACHE);localStorage.removeItem(LOCAL_HISTORY_PREFIX+Number(deleting));localStorage.removeItem(LOCAL_HISTORY_FULL_PREFIX+Number(deleting));const next=Number((d.next_conversation&&d.next_conversation.id)||1);localStorage.setItem(LOCAL_CONVERSATION,String(next));toast('当前对话已删除');location.href='/settings.html?conversation_id='+encodeURIComponent(next)}
+
+async function loadPersonas(){const box=document.getElementById('personaList');box.innerHTML='<div class="memory-empty">正在读取人设...</div>';try{const d=await fetchJSON('/api/personas');box.innerHTML='';(d.personas||[]).forEach(p=>{const item=document.createElement('div');item.className='resource-item persona-item';const title=document.createElement('strong');title.textContent=(p.active?'✓ ':'')+(p.title||'人物设定');const meta=document.createElement('span');meta.textContent=`${p.active?'当前启用':'未启用'} · ${p.updated_at||p.created_at||''}`;const text=document.createElement('p');text.className='persona-content';text.textContent=p.content||'';const actions=document.createElement('div');actions.className='toolbar-inline';const details=document.createElement('button');details.className='secondary mini';details.textContent='查看详情';details.onclick=()=>showPersonaDetail(p);item.onclick=e=>{if(!e.target.closest('button'))showPersonaDetail(p)};const toggle=document.createElement('button');toggle.className=p.active?'secondary mini danger':'secondary mini';toggle.textContent=p.active?'停用':'启用';toggle.onclick=()=>setPersonaActive(p.id,!p.active);const del=document.createElement('button');del.className='secondary mini danger';del.textContent='删除';del.onclick=()=>deletePersona(p,item);actions.append(details,toggle,del);item.append(title,meta,text,actions);box.appendChild(item)});if(!box.children.length)box.innerHTML='<div class="memory-empty">还没有人设</div>'}catch(e){box.innerHTML='<div class="memory-empty">人设读取失败</div>';toast(e.message)}}
+function showPersonaDetail(p){editingPersona=p;document.getElementById('personaDetailTitle').textContent=p.title||'人物设定详情';document.getElementById('personaDetailText').value=p.content||'';document.getElementById('personaDetail').classList.add('open');setTimeout(()=>document.getElementById('personaDetailText').focus(),80)}
+function hidePersonaDetail(){document.getElementById('personaDetail').classList.remove('open');editingPersona=null}
+function closePersonaDetail(e){if(e.target.id==='personaDetail')hidePersonaDetail()}
+async function copyPersonaDetail(){const text=document.getElementById('personaDetailText').value;try{await navigator.clipboard.writeText(text)}catch{const input=document.getElementById('personaDetailText');input.focus();input.select();document.execCommand('copy')}toast('人物设定已复制')}
+async function savePersonaDetail(){if(!editingPersona)return;const text=document.getElementById('personaDetailText').value.trim();if(!text)return toast('人物设定不能为空');const fd=new FormData();fd.append('title',editingPersona.title||'人物设定');fd.append('text',text);fd.append('activate',editingPersona.active?'true':'false');const r=await fetch('/api/personas',{method:'POST',body:fd});const d=await r.json().catch(()=>({}));if(!r.ok||d.error)return toast(d.error||`人物设定保存失败（${r.status}）`);hidePersonaDetail();await loadPersonas();toast('人物设定已保存')}
+async function uploadPersona(active=true){const fd=new FormData();fd.append('title',document.getElementById('persona-title').value);fd.append('text',document.getElementById('persona-text').value);fd.append('activate',active?'true':'false');const f=document.getElementById('persona-file').files[0];if(f)fd.append('file',f);const r=await fetch('/api/personas',{method:'POST',body:fd});const d=await r.json().catch(()=>({}));if(!r.ok||d.error)return toast(d.error||`人设保存失败（${r.status}）`);toast(active?'人设已启用':'人设已保存，未启用');document.getElementById('persona-title').value='';document.getElementById('persona-text').value='';resetFileInput('persona-file');await loadPersonas()}
+async function setPersonaActive(id,active){const r=await fetch('/api/personas/activate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id,active})});const d=await r.json().catch(()=>({}));if(!r.ok||d.error)return toast(d.error||`人设切换失败（${r.status}）`);toast(active?'人设已启用':'人设已停用');await loadPersonas()}
+async function deletePersona(p,item){if(!await NativeFeel.confirm(`删除人设「${p.title||p.id}」吗？`,{title:'删除人设',confirmText:'删除'}))return;const r=await fetch('/api/personas?id='+encodeURIComponent(p.id),{method:'DELETE'});const d=await r.json().catch(()=>({}));if(!r.ok||d.error)return toast(d.error||`人设删除失败（${r.status}）`);NativeFeel.collapseOut(item,loadPersonas);toast('人设已删除')}
+
+async function loadDocs(){const box=document.getElementById('docList');box.innerHTML='<div class="memory-empty">正在读取文档...</div>';try{const d=await fetchJSON('/api/knowledge-docs');box.innerHTML='';(d.docs||[]).forEach(x=>{const item=document.createElement('div');item.className='resource-item';const title=document.createElement('strong');title.textContent=x.title||'历史文档';const meta=document.createElement('span');meta.textContent=`${x.status||''} · ${x.updated_at||x.created_at||''}`;const text=document.createElement('p');text.textContent=x.error||x.content_text||'';const actions=document.createElement('div');actions.className='toolbar-inline';const del=document.createElement('button');del.type='button';del.className='secondary mini danger';del.textContent='删除';del.onclick=()=>deleteDoc(x,item);actions.append(del);item.append(title,meta,text,actions);box.appendChild(item)});if(!box.children.length)box.innerHTML='<div class="memory-empty">还没有文档</div>'}catch(e){box.innerHTML='<div class="memory-empty">文档读取失败</div>';toast(e.message)}}
+async function deleteDoc(doc,item){if(!await NativeFeel.confirm(`删除历史文档「${doc.title||doc.id}」吗？文档索引也会一并删除。`,{title:'删除历史文档',confirmText:'删除'}))return;const r=await fetch('/api/knowledge-docs?id='+encodeURIComponent(doc.id),{method:'DELETE'});const d=await r.json().catch(()=>({}));if(!r.ok||d.error)return toast(d.error||`文档删除失败（${r.status}）`);NativeFeel.collapseOut(item,loadDocs);toast('历史文档已删除')}
+async function uploadDoc(){const fd=new FormData();fd.append('title',document.getElementById('doc-title').value);fd.append('api_key',apiKey());fd.append('api_base_url',apiBaseURL());const f=document.getElementById('doc-file').files[0];if(f)fd.append('file',f);const r=await fetch('/api/knowledge-docs',{method:'POST',body:fd});const d=await r.json().catch(()=>({}));toast(d.error||'文档已导入');if(!d.error){document.getElementById('doc-title').value='';resetFileInput('doc-file');await loadDocs()}}
+
+async function queueSelectedStickerFiles(input){const normalized=await Promise.all([...(input.files||[])].map(normalizeImageFile));clientLog('sticker_file_input',{files:normalized.map(fileInfo)});addPendingStickers(normalized,'file_input');resetFileInput(input.id)}
+function addPendingStickers(files,source='unknown'){const images=[...files].filter(Boolean);for(const file of images){pendingStickers.push({file,url:URL.createObjectURL(file),original_name:file.name||nextPastedName('png'),local:true})}clientLog('sticker_pending_add',{source,added:images.map(fileInfo),pending:pendingStickers.length});if(images.length)toast('表情包已加入待上传');renderStickerPreviews()}
+function renderStickerPreviews(){const box=document.getElementById('stickerPreviews');box.innerHTML='';pendingStickers.forEach((a,i)=>{const d=document.createElement('div');d.className='preview';const img=document.createElement('img');img.src=a.url;img.onclick=()=>showImageViewer(a.url);const btn=document.createElement('button');btn.type='button';btn.textContent='×';btn.onclick=()=>removePendingSticker(i);d.append(img,btn);box.appendChild(d)});clientLog('sticker_preview_render',{pending:pendingStickers.length,visible:box.querySelectorAll('img').length})}
+function removePendingSticker(index){const item=pendingStickers[index];clientLog('sticker_pending_remove',{index,original_name:item&&item.original_name,pending:pendingStickers.length});if(item&&item.local&&item.url)URL.revokeObjectURL(item.url);pendingStickers.splice(index,1);renderStickerPreviews()}
+function clearPendingStickers(reason='clear'){clientLog('sticker_pending_clear',{reason,count:pendingStickers.length});pendingStickers.forEach(a=>{if(a.local&&a.url)URL.revokeObjectURL(a.url)});pendingStickers=[];renderStickerPreviews()}
+async function uploadSticker(){if(isUploadingStickers)return;if(!pendingStickers.length)return toast('请先选择或粘贴图片');isUploadingStickers=true;try{const ok=await uploadStickerFiles(pendingStickers,'pending');if(ok)await loadStickers()}finally{isUploadingStickers=false}}
+async function uploadStickerFiles(items,source='unknown'){const batch=[...items].filter(Boolean);if(!batch.length)return false;clientLog('sticker_upload_batch_start',{source,count:batch.length,files:batch.map(item=>fileInfo(item.file||item))});let ok=0,dup=0;const failed=[];for(const item of batch){const f=item.file||item;const fd=new FormData();fd.append('api_key',apiKey());fd.append('api_base_url',apiBaseURL());fd.append('file',f,item.original_name||f.name||nextPastedName('png'));const r=await fetch('/api/stickers',{method:'POST',body:fd});const d=await r.json().catch(()=>({}));clientLog('sticker_upload_one_done',{source,status:r.status,error:d.error||'',name:d.sticker&&d.sticker.name,duplicate:!!d.duplicate,original_name:item.original_name||f.name||''});if(d.error||!r.ok){failed.push(item);toast(d.error||'表情包上传失败');continue}ok++;if(d.duplicate)dup++;if(item.local&&item.url)URL.revokeObjectURL(item.url)}const uploaded=new Set(batch.filter(item=>!failed.includes(item)));const remaining=pendingStickers.filter(item=>!uploaded.has(item)&&!batch.includes(item));pendingStickers=failed.concat(remaining);renderStickerPreviews();toast(ok?(dup&&dup===ok?`已存在 ${dup} 个相同表情包`:`已上传 ${ok} 个表情包${dup?`，${dup} 个已存在`:''}`):'表情包上传失败');return ok>0}
+async function loadStickers(){const box=document.getElementById('stickerList');box.innerHTML='<div class="memory-empty">正在读取表情包...</div>';try{const d=await fetchJSON('/api/stickers');renderStickerList(d.stickers||[])}catch(e){box.innerHTML='<div class="memory-empty">表情包读取失败</div>';toast(e.message)}}
+function renderStickerList(stickers){const box=document.getElementById('stickerList');box.innerHTML='';stickers.forEach(s=>box.appendChild(stickerView(s)));if(!stickers.length)box.innerHTML='<div class="memory-empty">还没有表情包</div>'}
+function stickerView(s){const row=document.createElement('div');row.className='resource-item sticker-item';row.dataset.id=s.id;row.ondblclick=()=>editSticker(row,s);const img=document.createElement('img');img.className='sticker';img.src=s.url;img.alt=s.name||'sticker';img.onclick=e=>{e.stopPropagation();showImageViewer(s.url)};const text=document.createElement('span');text.className='sticker-text';text.textContent=`${s.name||'表情包'} · ${s.tags||''}`;const del=document.createElement('button');del.type='button';del.className='sticker-delete';del.textContent='删除';del.title='删除表情包';del.onclick=e=>{e.stopPropagation();deleteSticker(s,row)};row.append(img,text,del);return row}
+function editSticker(row,s){clientLog('sticker_edit_open',{id:s.id,name:s.name});row.className='resource-item sticker-item editing';row.ondblclick=null;row.innerHTML='';const img=document.createElement('img');img.className='sticker';img.src=s.url;img.alt=s.name||'sticker';const form=document.createElement('div');form.className='sticker-edit-form';const name=inputEl('名称',s.name||'');const tags=inputEl('标签',s.tags||'');const desc=inputEl('描述',s.description||'');const mood=inputEl('情绪',s.mood||'neutral');const actions=document.createElement('div');actions.className='sticker-edit-actions';const save=document.createElement('button');save.type='button';save.className='primary';save.textContent='保存';save.onclick=()=>saveStickerEdit(s.id,{name:name.value,tags:tags.value,description:desc.value,mood:mood.value});const cancel=document.createElement('button');cancel.type='button';cancel.className='secondary';cancel.textContent='取消';cancel.onclick=()=>loadStickers();actions.append(save,cancel);form.append(name,tags,desc,mood,actions);row.append(img,form);name.focus();name.select()}
+function inputEl(label,value){const wrap=document.createElement('label');wrap.className='sticker-edit-field';const span=document.createElement('span');span.textContent=label;const input=document.createElement('input');input.value=value;input.onkeydown=e=>{if(e.key==='Enter'&&(e.ctrlKey||e.metaKey))input.closest('.sticker-edit-form').querySelector('.primary').click()};wrap.append(span,input);Object.defineProperty(wrap,'value',{get:()=>input.value});wrap.focus=()=>input.focus();wrap.select=()=>input.select();return wrap}
+async function saveStickerEdit(id,payload){clientLog('sticker_edit_save',{id,payload});const r=await fetch('/api/stickers?id='+id,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});const d=await r.json().catch(()=>({}));toast(d.error||'表情包标签已保存');await loadStickers()}
+async function deleteSticker(s,item){if(!await NativeFeel.confirm(`删除表情包「${s.name||s.id}」吗？`,{title:'删除表情包',confirmText:'删除'}))return;clientLog('sticker_delete',{id:s.id,name:s.name});const r=await fetch('/api/stickers?id='+s.id,{method:'DELETE'});const d=await r.json().catch(()=>({}));toast(d.error||'表情包已删除');if(!d.error)NativeFeel.collapseOut(item,loadStickers)}
+async function handleStickerPaste(e){if(activeTab!=='stickers')return;const files=await clipboardImageFiles(e.clipboardData);clientLog('sticker_paste',{types:[...(e.clipboardData?.types||[])],files:files.map(fileInfo)});if(files.length){e.preventDefault();e.stopPropagation();addPendingStickers(files,'paste')}}
+async function handleStickerDrop(e){e.preventDefault();const files=await Promise.all([...e.dataTransfer.files].filter(f=>f.type.startsWith('image/')||!f.type).map(normalizeImageFile));clientLog('sticker_drop',{files:files.map(fileInfo)});addPendingStickers(files,'drop')}
+document.addEventListener('paste',handleStickerPaste);
+
+async function clipboardImageFiles(data){const files=[];const seen=new Set();const addFile=async file=>{if(!file)return;const sig=`${file.size}:${file.type||'unknown'}:${file.lastModified||0}`;if(seen.has(sig))return;seen.add(sig);files.push(await normalizeImageFile(file))};if(!data)return files;for(const item of [...(data.items||[])]){if(item.kind==='file'&&item.type.startsWith('image/'))await addFile(item.getAsFile())}for(const file of [...(data.files||[])]){if(file.type.startsWith('image/'))await addFile(file)}if(files.length)return files;const htmlItem=[...(data.items||[])].find(item=>item.kind==='string'&&item.type==='text/html');if(htmlItem){const html=await clipboardString(htmlItem);const file=await imageSrcToFile(firstImageSrc(html));if(file)files.push(await normalizeImageFile(file))}if(files.length)return files;const uriItem=[...(data.items||[])].find(item=>item.kind==='string'&&(item.type==='text/uri-list'||item.type==='text/plain'));if(uriItem){const uri=(await clipboardString(uriItem)).split('\n').map(s=>s.trim()).find(s=>/^https?:\/\//.test(s)||s.startsWith('data:image/'));const file=await imageSrcToFile(uri);if(file)files.push(await normalizeImageFile(file))}return files}
+function clipboardString(item){return new Promise(resolve=>item.getAsString(resolve))}
+function firstImageSrc(html){const doc=new DOMParser().parseFromString(html||'','text/html');return doc.querySelector('img')?.src||''}
+async function imageSrcToFile(src){if(!src)return null;try{const resp=await fetch(src);const blob=await resp.blob();if(!blob.type.startsWith('image/'))return null;const ext=(blob.type.split('/')[1]||'png').split('+')[0];return new File([blob],`pasted.${ext}`,{type:blob.type})}catch{return null}}
+async function normalizeImageFile(file){if(!file)return file;return MyAppImages.normalize(file,{maxEdge:2048,maxBytes:12*1024*1024,quality:.88})}
+function nextPastedName(ext='png'){pasteImageSeq+=1;return `pasted-${Date.now()}-${pasteImageSeq}.${ext}`}
+function fileInfo(f){return f?{name:f.name||'',type:f.type||'',size:f.size||0,lastModified:f.lastModified||0}:null}
+async function fetchJSON(url,opts){const r=await fetch(url,{cache:'no-store',...(opts||{})});const d=await r.json().catch(()=>({}));if(!r.ok||d.error)throw new Error(d.error||`请求失败（${r.status}）`);return d}
+function showImageViewer(url){document.getElementById('imageViewerImg').src=url;document.getElementById('imageViewer').classList.add('open')}
+function hideImageViewer(){document.getElementById('imageViewer').classList.remove('open');document.getElementById('imageViewerImg').src=''}
+function closeImageViewer(e){if(e.target.id==='imageViewer')hideImageViewer()}
+function toast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');clearTimeout(window.toastTimer);window.toastTimer=setTimeout(()=>el.classList.remove('show'),2200)}
+
+function restoreSettingsViewport(){
+  const root=document.querySelector('.settings-workbench');
+  if(!root)return;
+  ['position','top','right','bottom','left','height'].forEach(property=>root.style.removeProperty(property));
+  document.documentElement.classList.remove('keyboard-open');
+  const main=root.querySelector('.workbench-main');
+  if(main)main.scrollTop=0;
+  window.scrollTo(0,0);
+  document.body?.getBoundingClientRect();
+}
+let settingsViewportRestoreTimer=0;
+function scheduleSettingsViewportRestore(delay=150){
+  clearTimeout(settingsViewportRestoreTimer);
+  settingsViewportRestoreTimer=setTimeout(restoreSettingsViewport,delay);
+}
+document.addEventListener('focusout',event=>{
+  if(!event.target.matches?.('input,textarea,select,[contenteditable="true"]'))return;
+  scheduleSettingsViewportRestore(150);
+  [360,800].forEach(delay=>setTimeout(restoreSettingsViewport,delay));
+});
+init();
+</script>
+<script>
+function captureSettingsScroll(){const main=document.querySelector('.settings-workbench .workbench-main');return{main,top:main?.scrollTop||0,page:window.scrollY||0}}
+function restoreSettingsScroll(saved){if(!saved)return;requestAnimationFrame(()=>{if(saved.main)saved.main.scrollTop=saved.top;window.scrollTo(0,saved.page);requestAnimationFrame(()=>{if(saved.main)saved.main.scrollTop=saved.top;window.scrollTo(0,saved.page)})})}
+const originalSaveSettings=window.saveSettings;
+window.saveSettings=async function(){const saved=captureSettingsScroll();try{return await originalSaveSettings.apply(this,arguments)}finally{restoreSettingsScroll(saved)}};
+</script>
+  <script src="/bubble-skins.js?v=20260912-4"></script>
+  <script src="/wake-activity.js?v=20260911-1"></script>
+</body>
+</html>
