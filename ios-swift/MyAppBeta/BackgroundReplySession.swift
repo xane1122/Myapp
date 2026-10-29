@@ -31,6 +31,9 @@ final class BackgroundReplySession: NSObject, URLSessionDownloadDelegate {
         let message_id: String
         let assistant: String?
         let preview: String?
+        let error: String?
+        let error_code: String?
+        let failure_id: String?
     }
 
     func reconnect() { if AppConfiguration.backgroundResultsEnabled { _ = session } }
@@ -76,7 +79,7 @@ final class BackgroundReplySession: NSObject, URLSessionDownloadDelegate {
               let bytes = try? location.resourceValues(forKeys: [.fileSizeKey]).fileSize, bytes <= 1_048_576,
               let data = try? Data(contentsOf: location),
               let result = try? JSONDecoder().decode(ResultDocument.self, from: data),
-              result.job_id == ticket.jobID, result.status == "completed", result.conversation_id == ticket.routeConversationID,
+              result.job_id == ticket.jobID, result.conversation_id == ticket.routeConversationID,
               let route = ChatRoute(conversationID: result.conversation_id, messageID: result.message_id,
                                     assistant: result.assistant ?? ticket.assistant) else { return }
         finishing.enter()
@@ -87,7 +90,10 @@ final class BackgroundReplySession: NSObject, URLSessionDownloadDelegate {
             guard !UserDefaults.standard.bool(forKey: key) else { return }
             let shouldNotify = await MainActor.run { UIApplication.shared.applicationState != .active }
             do {
-                if shouldNotify { try await NotificationService.shared.schedule(route: route, body: result.preview ?? "有一条新回复，点击查看。") }
+                let body: String
+                if result.status == "completed" { body = result.preview ?? "有一条新回复，点击查看。" }
+                else { body = result.error ?? "后台回复失败（\(result.error_code ?? "native_reply_failed")），点击查看失败记录。" }
+                if shouldNotify { try await NotificationService.shared.schedule(route: route, body: body) }
                 UserDefaults.standard.set(true, forKey: key)
             } catch { /* User can open the ordinary web history when notification permission is denied. */ }
         }
